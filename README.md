@@ -6,9 +6,9 @@ Yuyi is the RESTful API backend for a generic podcast hosting platform.
 
 ### 2025-03-04
 
-- [x] Initial project
+- [x] Initialize project
 - [ ] Build database models
-- [ ] Build database functionality
+- [x] Build database functionality
 
 [A Podcaster’s Guide to RSS - Apple](https://help.apple.com/itc/podcasts_connect/)
 
