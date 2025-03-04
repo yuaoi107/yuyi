@@ -7,7 +7,7 @@ class PodcastBase(SQLModel):
     description: str
     language: str
     itunes_category: str
-    itunes_sub_category: str | None = None
+    itunes_subcategory: str | None = None
     itunes_explicit: bool = False
 
     copyright: str 
@@ -20,7 +20,6 @@ class Podcast(PodcastBase, table=True):
     feed_url: str
     link: str
     itunes_author: str
-    createtime: date
     itunes_block: bool = False
     itunes_complete: bool = False
     generator: str
@@ -33,12 +32,11 @@ class PodcastPublic(PodcastBase):
     author_id: int
     itunes_image_url: str
     feed_url: str
-    link: str
     createtime: date
     itunes_complete: bool = False
+    createtime: date
     generator: str
 
 class PodcastPatch(PodcastBase):
-    link: str | None = None
     itunes_complete: bool | None = None
     
