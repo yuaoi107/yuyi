@@ -1,11 +1,11 @@
 from datetime import date
 from typing import Annotated
 
-from fastapi import APIRouter, HTTPException, Path, Query, status
-from sqlmodel import select, SQLModel
+from fastapi import APIRouter, HTTPException, Query, status
+from sqlmodel import select
 
 from ..utils.dependables import SessionDep
-from ..utils.util import hash_password
+from ..utils.util import hash_password, add_responses, Message
 from ..models.user import (
     User,
     UserUpload,
@@ -19,11 +19,8 @@ router = APIRouter(
 )
 
 
-class ExceptionModel(SQLModel):
-    detail: str
-
-
-@router.post("", status_code=status.HTTP_201_CREATED, response_model=UserPublic, summary="创建用户")
+@router.post("", status_code=status.HTTP_201_CREATED, response_model=UserPublic, summary="创建用户",
+             responses=add_responses(409))
 async def create_user(session: SessionDep, user: UserUpload):
 
     if session.exec(select(User).where(User.username == user.username)).first():
@@ -54,7 +51,8 @@ async def get_users(session: SessionDep, offset: Annotated[int, Query()], limit:
     return users
 
 
-@router.patch("{id}", status_code=status.HTTP_200_OK, response_model=UserPublic, summary="修改用户")
+@router.patch("{id}", status_code=status.HTTP_200_OK, response_model=UserPublic, summary="修改用户",
+              responses=add_responses(404))
 async def patch_user(session: SessionDep, id: int, user: UserPatch):
 
     db_user = session.get(User, id)
@@ -78,10 +76,11 @@ async def patch_user(session: SessionDep, id: int, user: UserPatch):
     return db_user
 
 
-@router.delete("{id}", status_code=status.HTTP_200_OK, summary="删除用户")
+@router.delete("{id}", status_code=status.HTTP_200_OK, response_model=Message, summary="删除用户", responses=add_responses(404))
 async def delete_user(session: SessionDep, id: int):
 
     user = session.get(User, id)
     if not user:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "User not found.")
     session.delete(user)
+    return {"detail": "Successfully deleted"}

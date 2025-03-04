@@ -4,9 +4,9 @@ from datetime import date
 
 
 class UserBase(SQLModel):
-    nickname: str
+    nickname: str = Field(min_length=6, max_length=20)
     email: EmailStr | None = None
-    description: str | None = None
+    description: str | None = Field(default=None, max_length=200)
 
 
 class User(UserBase, table=True):
@@ -18,12 +18,13 @@ class User(UserBase, table=True):
 
 
 class UserUpload(UserBase):
-    username: str
-    password: str
+    username: str = Field(min_length=6, max_length=20)
+    password: str = Field(min_length=6, max_length=20)
 
 
 class UserPublic(UserBase):
     id: int
+    username: str
     avatar_url: str | None = None
     createtime: date
 
