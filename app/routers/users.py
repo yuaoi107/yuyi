@@ -45,8 +45,14 @@ async def create_user(session: SessionDep, user: UserUpload):
     return db_user
 
 
+@router.get("{id}", status_code=status.HTTP_200_OK, response_model=UserPublic, summary="获取单个用户")
+async def get_users(session: SessionDep, id: int):
+    db_user = session.get(User, id)
+    return db_user
+
+
 @router.get("", status_code=status.HTTP_200_OK, response_model=list[UserPublic], summary="获取用户")
-async def get_users(session: SessionDep, offset: Annotated[int, Query()], limit: Annotated[int, Query()]):
+async def get_users(session: SessionDep, offset: Annotated[int, Query()] = 0, limit: Annotated[int, Query()] = 10):
     users = session.exec(select(User).offset(offset).limit(limit)).all()
     return users
 

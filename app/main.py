@@ -6,7 +6,7 @@ from fastapi.staticfiles import StaticFiles
 from .models import *
 from .database.database import create_db_and_tables
 from .config.settings import settings
-from .routers import users
+from .routers import users, avatars
 
 create_db_and_tables()
 
@@ -22,7 +22,8 @@ async def check_app_state(key: Annotated[str, Query()]):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
     return {"state": "fine"}
 
-app.mount("/archives", StaticFiles(directory=settings.ARCHIVES_DIR),
+app.mount(settings.ARCHIVE_ENDPOINT, StaticFiles(directory=settings.ARCHIVES_DIR),
           name="archives")
 
 app.include_router(users.router)
+app.include_router(avatars.router)
