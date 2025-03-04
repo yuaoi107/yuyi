@@ -15,10 +15,13 @@ class User(UserBase, table=True):
     createtime: date
 
 class UserUpload(UserBase):
-    pass
+    password: str
 
 class UserPublic(UserBase):
     id: int
     avatar_url: str | None
     createtime: date
+
+class UserPatch(UserBase):
+    password: str | None = None
 

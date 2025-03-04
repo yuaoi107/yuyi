@@ -32,4 +32,18 @@ User:
 Podcast:
 
 - PodcastBase:
-    - 
+    - Required:
+        - title
+        - description (str | CDATA)
+        - itunes_image
+        - language (iso639)
+        - itunes_category
+        - itunes_explicit
+    - Recommended:
+        - itunes_author
+        - link
+    - Situational:
+        - copyright
+        - itunes_block (Yes | others)
+        - itunes_complete (Yes | others)
+        - generator
