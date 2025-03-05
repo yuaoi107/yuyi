@@ -1,5 +1,11 @@
-from sqlmodel import SQLModel, Field
+from typing import TYPE_CHECKING, Optional
+
+from sqlmodel import Relationship, SQLModel, Field
 from datetime import date
+
+if TYPE_CHECKING:
+    from .user import User, UserPublic
+
 
 class PodcastBase(SQLModel):
 
@@ -10,7 +16,8 @@ class PodcastBase(SQLModel):
     itunes_subcategory: str | None = None
     itunes_explicit: bool = False
 
-    copyright: str 
+    copyright: str
+
 
 class Podcast(PodcastBase, table=True):
 
@@ -24,8 +31,12 @@ class Podcast(PodcastBase, table=True):
     itunes_complete: bool = False
     generator: str
 
+    author: Optional["User"] = Relationship(back_populates="podcasts")
+
+
 class PodcastUpload(PodcastBase):
     pass
+
 
 class PodcastPublic(PodcastBase):
     id: int
@@ -37,6 +48,10 @@ class PodcastPublic(PodcastBase):
     createtime: date
     generator: str
 
+
+class PodcastPublicWithAuthor(PodcastPublic):
+    author: Optional["User"] = None
+
+
 class PodcastPatch(PodcastBase):
     itunes_complete: bool | None = None
-    

@@ -10,6 +10,7 @@ from ..models.user import (
     User,
     UserUpload,
     UserPublic,
+    UserPublicWithPodcasts,
     UserPatch
 )
 

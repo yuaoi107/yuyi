@@ -1,6 +1,11 @@
-from sqlmodel import SQLModel, Field
+from typing import TYPE_CHECKING, Optional
+
+from sqlmodel import Relationship, SQLModel, Field
 from pydantic import EmailStr
 from datetime import date
+
+if TYPE_CHECKING:
+    from .podcast import Podcast, PodcastPublic
 
 
 class UserBase(SQLModel):
@@ -16,6 +21,8 @@ class User(UserBase, table=True):
     avatar_url: str | None = None
     createtime: date
 
+    podcasts: list["Podcast"] = Relationship(back_populates="author")
+
 
 class UserUpload(UserBase):
     username: str = Field(min_length=6, max_length=20)
@@ -27,6 +34,10 @@ class UserPublic(UserBase):
     username: str
     avatar_url: str | None = None
     createtime: date
+
+
+class UserPublicWithPodcasts(UserPublic):
+    podcasts: list["PodcastPublic"] = []
 
 
 class UserPatch(UserBase):
