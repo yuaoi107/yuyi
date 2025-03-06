@@ -1,27 +1,22 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Query, status, HTTPException
+from fastapi import APIRouter, Query, status
 
 from ..database.database import SessionDep
-from ..common.util import add_responses, Message, UserRole
+from ..common.util import add_responses, Message
 from ..common.auth import UserDep
 from ..models.user import (
-    User,
     UserUpload,
     UserPublic,
     UserPatch
 )
 from ..services.user_service import UserService
+from ..services.shared import permission_check
 
 router = APIRouter(
     prefix="/users",
     tags=["用户"]
 )
-
-
-def same_role_check(user_login: User, id):
-    if user_login.role != UserRole.ADMIN and user_login.id != id:
-        raise HTTPException(403)
 
 
 @router.post(
@@ -49,6 +44,17 @@ async def get_with_query(
 
 
 @router.get(
+    "/me",
+    status_code=status.HTTP_200_OK,
+    response_model=UserPublic,
+    summary="当前用户",
+    responses=add_responses(401)
+)
+async def get_me(user_login: UserDep):
+    return user_login
+
+
+@router.get(
     "/{id}",
     status_code=status.HTTP_200_OK,
     response_model=UserPublic,
@@ -67,7 +73,7 @@ async def get_by_path(session: SessionDep, id: int):
     responses=add_responses(404, 409)
 )
 async def patch_by_path(user_login: UserDep, session: SessionDep, id: int, user: UserPatch):
-    same_role_check(user_login, id)
+    permission_check(user_login, id)
     return UserService.update_user(session, id, user)
 
 
@@ -79,16 +85,5 @@ async def patch_by_path(user_login: UserDep, session: SessionDep, id: int, user:
     responses=add_responses(404)
 )
 async def delete_by_path(user_login: UserDep, session: SessionDep, id: int):
-    same_role_check(user_login, id)
+    permission_check(user_login, id)
     return UserService.delete_user(session, id)
-
-
-# @router.get(
-#     "/me",
-#     status_code=status.HTTP_200_OK,
-#     response_model=UserPublic,
-#     summary="获取当前用户",
-#     responses=add_responses(401)
-# )
-# async def get_user_me(user: UserDep):
-#     return UserService.get_me(user)

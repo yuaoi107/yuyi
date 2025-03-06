@@ -3,6 +3,8 @@ from typing import Annotated
 from fastapi import APIRouter, File, Query, UploadFile, status
 from fastapi.responses import RedirectResponse
 
+from src.common.auth import UserDep
+from src.services.shared import permission_check
 from ..database.database import SessionDep
 from ..common.util import add_responses, Message
 from ..services.avatar_service import AvatarService
@@ -21,11 +23,13 @@ router = APIRouter(
     responses=add_responses(404, 500)
 )
 async def put_with_query(
+    user_login: UserDep,
     session: SessionDep,
     user_id: Annotated[int, Query()],
     avatar: Annotated[UploadFile, File()]
 ):
-    return await AvatarService.create_avatar(session, id, avatar)
+    permission_check(user_login, user_id)
+    return await AvatarService.create_avatar(session, user_id, avatar)
 
 
 @router.get(
