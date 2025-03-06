@@ -9,9 +9,9 @@ if TYPE_CHECKING:
 
 
 class UserBase(SQLModel):
-    nickname: str = Field(min_length=6, max_length=20)
+    nickname: str
     email: EmailStr | None = None
-    description: str | None = Field(default=None, max_length=200)
+    description: str | None = None
 
 
 class User(UserBase, table=True):
@@ -25,8 +25,8 @@ class User(UserBase, table=True):
 
 
 class UserUpload(UserBase):
-    username: str = Field(min_length=6, max_length=20)
-    password: str = Field(min_length=6, max_length=20)
+    username: str
+    password: str
 
 
 class UserPublic(UserBase):
@@ -41,7 +41,7 @@ class UserPublicWithPodcasts(UserPublic):
 
 
 class UserPatch(SQLModel):
-    nickname: str | None = Field(default=None, min_length=6, max_length=20)
-    email: EmailStr | None = Field(default=None)
-    description: str | None = Field(default=None, max_length=200)
-    password: str | None = Field(default=None, min_length=6, max_length=20)
+    nickname: str | None = None
+    email: EmailStr | None = None
+    description: str | None = None
+    password: str | None = None

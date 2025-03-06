@@ -1,19 +1,16 @@
-from datetime import date
 from typing import Annotated
 
-from fastapi import APIRouter, HTTPException, Query, status
-from sqlmodel import select
+from fastapi import APIRouter, Query, status, HTTPException
 
 from ..database.database import SessionDep
 from ..utils.util import add_responses, Message
-from ..utils.auth import hash_password, UserDep
+from ..utils.auth import UserDep
 from ..models.user import (
-    User,
     UserUpload,
     UserPublic,
-    UserPublicWithPodcasts,
     UserPatch
 )
+from ..services.user_service import UserService
 
 router = APIRouter(
     prefix="/users",
@@ -21,85 +18,71 @@ router = APIRouter(
 )
 
 
-@router.post("", status_code=status.HTTP_201_CREATED, response_model=UserPublic, summary="创建用户",
-             responses=add_responses(409))
-async def create_user(session: SessionDep, user: UserUpload):
-
-    if session.exec(select(User).where(User.username == user.username)).first():
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT, detail="Username taken.")
-
-    if session.exec(select(User).where(User.nickname == user.nickname)).first():
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT, detail="Nickname taken.")
-
-    hashed_password = hash_password(user.password)
-    extra_data = {
-        "hashed_password": hashed_password,
-        "createtime": date.today().isoformat()
-    }
-    db_user = User.model_validate(user, update=extra_data)
-
-    session.add(db_user)
-    session.commit()
-    session.refresh(db_user)
-
-    return db_user
+@router.post(
+    "",
+    status_code=status.HTTP_201_CREATED,
+    response_model=UserPublic, summary="创建用户",
+    responses=add_responses(409)
+)
+async def post(session: SessionDep, user: UserUpload):
+    return UserService.create_user(session, user)
 
 
-@router.get("", status_code=status.HTTP_200_OK, response_model=list[UserPublic], summary="获取用户列表")
-async def get_users(session: SessionDep, offset: Annotated[int, Query()] = 0, limit: Annotated[int, Query()] = 10):
-    users = session.exec(select(User).offset(offset).limit(limit)).all()
-    return users
+@router.get(
+    "",
+    status_code=status.HTTP_200_OK,
+    response_model=list[UserPublic],
+    summary="获取用户列表"
+)
+async def get_with_query(
+    session: SessionDep,
+    offset: Annotated[int, Query()] = 0,
+    limit: Annotated[int, Query()] = 10
+):
+    return UserService.get_users(session, offset, limit)
 
 
-@router.get("/{id}", status_code=status.HTTP_200_OK, response_model=UserPublic, summary="获取单个用户",
-            responses=add_responses(404))
-async def get_users(session: SessionDep, id: int):
-    db_user = session.get(User, id)
-    if not db_user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="User not found.")
-    return db_user
+@router.get(
+    "/{id}",
+    status_code=status.HTTP_200_OK,
+    response_model=UserPublic,
+    summary="获取单个用户",
+    responses=add_responses(404)
+)
+async def get_by_id(session: SessionDep, id: int):
+    return UserService.get_user(session, id)
 
 
-@router.patch("/{id}", status_code=status.HTTP_200_OK, response_model=UserPublic, summary="修改用户",
-              responses=add_responses(404))
-async def patch_user(session: SessionDep, id: int, user: UserPatch):
-
-    db_user = session.get(User, id)
-
-    if not db_user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="User not found.")
-
-    user_data = user.model_dump(exclude_unset=True)
-    extra_data = {}
-
-    if "password" in user_data:
-        hashed_password = hash_password(user_data["password"])
-        extra_data["hashed_password"] = hashed_password
-
-    db_user.sqlmodel_update(user_data, update=extra_data)
-    session.add(db_user)
-    session.commit()
-    session.refresh(db_user)
-
-    return db_user
+@router.patch(
+    "/{id}",
+    status_code=status.HTTP_200_OK,
+    response_model=UserPublic,
+    summary="修改用户",
+    responses=add_responses(404)
+)
+async def patch(user_login: UserDep, session: SessionDep, id: int, user: UserPatch):
+    if user_login.id != id:
+        raise HTTPException(status.HTTP_403_FORBIDDEN)
+    return UserService.update_user(session, id, user)
 
 
-@router.delete("/{id}", status_code=status.HTTP_200_OK, response_model=Message, summary="删除用户",
-               responses=add_responses(404))
-async def delete_user(session: SessionDep, id: int):
+@router.delete(
+    "/{id}",
+    status_code=status.HTTP_200_OK,
+    response_model=Message,
+    summary="删除用户",
+    responses=add_responses(404)
+)
+async def delete(session: SessionDep, id: int):
+    return UserService.delete_user()
 
-    user = session.get(User, id)
-    if not user:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, "User not found.")
-    session.delete(user)
-    session.commit()
-    return {"detail": "Successfully deleted"}
 
-
-@router.get("/users/me", response_model=UserPublic)
-async def get_user_me(user: UserDep):
-    return user
+# @router.get(
+#     "/me",
+#     status_code=status.HTTP_200_OK,
+#     response_model=UserPublic,
+#     summary="获取当前用户",
+#     responses=add_responses(401)
+# )
+# async def get_user_me(user: UserDep):
+#     return UserService.get_me(user)

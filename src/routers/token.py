@@ -1,5 +1,3 @@
-
-
 from datetime import timedelta
 from typing import Annotated
 
@@ -8,8 +6,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 
 from ..database.database import SessionDep
 from ..utils.auth import Token, authenticate_user, create_access_token
-
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+from ..config.settings import settings
 
 router = APIRouter(
     prefix="/token",
@@ -26,7 +23,8 @@ async def login_for_access_token(session: SessionDep, form_data: Annotated[OAuth
             detail="Incorrect username or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token_expires = timedelta(
+        minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
         data={"sub": user.username},
         expires_delta=access_token_expires
