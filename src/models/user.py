@@ -40,5 +40,8 @@ class UserPublicWithPodcasts(UserPublic):
     podcasts: list["PodcastPublic"] = []
 
 
-class UserPatch(UserBase):
-    password: str | None = None
+class UserPatch(SQLModel):
+    nickname: str | None = Field(default=None, min_length=6, max_length=20)
+    email: EmailStr | None = Field(default=None)
+    description: str | None = Field(default=None, max_length=200)
+    password: str | None = Field(default=None, min_length=6, max_length=20)

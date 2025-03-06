@@ -14,6 +14,7 @@ class FileType(Enum):
     PODCAST_COVER = "podcast_covers"
     EPISODE_COVER = "episode_covers"
     AUDIO = "audios"
+    RSS_XML = "rss_xmls"
 
 
 class Message(BaseModel):

@@ -40,7 +40,6 @@ class PodcastUpload(PodcastBase):
 
 class PodcastPublic(PodcastBase):
     id: int
-    author_id: int
     itunes_image_url: str
     feed_url: str
     createtime: date
@@ -53,5 +52,14 @@ class PodcastPublicWithAuthor(PodcastPublic):
     author: Optional["User"] = None
 
 
-class PodcastPatch(PodcastBase):
+class PodcastPatch(SQLModel):
+
+    title: str | None = None
+    description: str | None = None
+    language: str | None = None
+    itunes_category: str | None = None
+    itunes_subcategory: str | None = None
+    itunes_explicit: bool = False
+
+    copyright: str | None = None
     itunes_complete: bool | None = None

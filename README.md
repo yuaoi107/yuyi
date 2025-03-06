@@ -73,9 +73,11 @@ Episode:
     - itunes_season
     - itunes_block
 
-### 2025-03-05
+### 2025-03-06
 
 - [ ] Build database models
 - [ ] User APIs
 - [ ] Podcast APIs
 - [ ] Episode APIs
+- [ ] Authentication & Authorization
+

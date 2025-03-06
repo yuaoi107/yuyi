@@ -46,19 +46,22 @@ async def create_user(session: SessionDep, user: UserUpload):
     return db_user
 
 
-@router.get("{id}", status_code=status.HTTP_200_OK, response_model=UserPublic, summary="获取单个用户")
-async def get_users(session: SessionDep, id: int):
-    db_user = session.get(User, id)
-    return db_user
-
-
-@router.get("", status_code=status.HTTP_200_OK, response_model=list[UserPublic], summary="获取用户")
+@router.get("", status_code=status.HTTP_200_OK, response_model=list[UserPublic], summary="获取用户列表")
 async def get_users(session: SessionDep, offset: Annotated[int, Query()] = 0, limit: Annotated[int, Query()] = 10):
     users = session.exec(select(User).offset(offset).limit(limit)).all()
     return users
 
 
-@router.patch("{id}", status_code=status.HTTP_200_OK, response_model=UserPublic, summary="修改用户",
+@router.get("/{id}", status_code=status.HTTP_200_OK, response_model=UserPublic, summary="获取单个用户")
+async def get_users(session: SessionDep, id: int):
+    db_user = session.get(User, id)
+    if not db_user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="User not found.")
+    return db_user
+
+
+@router.patch("/{id}", status_code=status.HTTP_200_OK, response_model=UserPublic, summary="修改用户",
               responses=add_responses(404))
 async def patch_user(session: SessionDep, id: int, user: UserPatch):
 
@@ -66,7 +69,7 @@ async def patch_user(session: SessionDep, id: int, user: UserPatch):
 
     if not db_user:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Not found user.")
+            status_code=status.HTTP_404_NOT_FOUND, detail="User not found.")
 
     user_data = user.model_dump(exclude_unset=True)
     extra_data = {}
@@ -83,11 +86,12 @@ async def patch_user(session: SessionDep, id: int, user: UserPatch):
     return db_user
 
 
-@router.delete("{id}", status_code=status.HTTP_200_OK, response_model=Message, summary="删除用户", responses=add_responses(404))
+@router.delete("/{id}", status_code=status.HTTP_200_OK, response_model=Message, summary="删除用户", responses=add_responses(404))
 async def delete_user(session: SessionDep, id: int):
 
     user = session.get(User, id)
     if not user:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "User not found.")
     session.delete(user)
+    session.commit()
     return {"detail": "Successfully deleted"}
