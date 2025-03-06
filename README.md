@@ -8,50 +8,50 @@ Yuyi is the RESTful API backend for a generic podcast hosting platform.
 
 State   | Method      | Endpoint
 --------|-------------|-----
-[x]     | POST        | `/users`
-[ ]     | GET         | `/users?username&offset&limit`
-[ ]     | GET         | `/users/{user_id}`
-[ ]     | **PUT**     | `/users/{user_id}`
-[ ]     | **DELETE**  | `/users/{user_id}`
-[ ]     | GET         | `/users/{user_id}/avatar`
-[ ]     | **PUT**     | `/users/{user_id}/avatar`
+☑️      | POST        | `/users`
+❌      | GET         | `/users?username&offset&limit`
+❌      | GET         | `/users/{user_id}`
+❌      | **PUT**     | `/users/{user_id}`
+❌      | **DELETE**  | `/users/{user_id}`
+❌      | GET         | `/users/{user_id}/avatar`
+❌      | **PUT**     | `/users/{user_id}/avatar`
 
 ### Podcast
 
 State   | Method      | Endpoint
 --------|-------------|-----
-[ ]     | **POST**    | `/users/{user_id}/podcasts`
-[ ]     | GET         | `/users/{user_id}/podcasts?offset&limit`
-[ ]     | GET         | `/users/{user_id}/podcasts/{podcast_id}`
-[ ]     | **PUT**     | `/users/{user_id}/podcasts/{podcast_id}`
-[ ]     | **DELETE**  | `/users/{user_id}/podcasts/{podcast_id}`
-[ ]     | **POST**    | `/podcasts`
-[ ]     | **GET**     | `/podcasts?category&offset&limit`
-[ ]     | GET         | `/podcasts/{podcast_id}`
-[ ]     | **PUT**     | `/podcasts/{podcast_id}`
-[ ]     | **DELETE**  | `/podcasts/{podcast_id}`
-[ ]     | GET         | `/podcasts/{podcast_id}/cover`
-[ ]     | **PUT**     | `/podcasts/{podcast_id}/cover`
-[ ]     | GET         | `/podcasts/{podcast_id}/rss`
+❌      | **POST**    | `/users/{user_id}/podcasts`
+❌      | GET         | `/users/{user_id}/podcasts?offset&limit`
+❌      | GET         | `/users/{user_id}/podcasts/{podcast_id}`
+❌      | **PUT**     | `/users/{user_id}/podcasts/{podcast_id}`
+❌      | **DELETE**  | `/users/{user_id}/podcasts/{podcast_id}`
+❌      | **POST**    | `/podcasts`
+❌      | **GET**     | `/podcasts?category&offset&limit`
+❌      | GET         | `/podcasts/{podcast_id}`
+❌      | **PUT**     | `/podcasts/{podcast_id}`
+❌      | **DELETE**  | `/podcasts/{podcast_id}`
+❌      | GET         | `/podcasts/{podcast_id}/cover`
+❌      | **PUT**     | `/podcasts/{podcast_id}/cover`
+❌      | GET         | `/podcasts/{podcast_id}/rss`
 
 ### Episode
 
 State   | Method      | Endpoint
 --------|-------------|-----
-[ ]     | **POST**    | `/podcasts/{podcast_id}/episodes`
-[ ]     | GET         | `/podcasts/{podcast_id}/episodes?season&offset&limit`
-[ ]     | GET         | `/podcasts/{podcast_id}/episodes/{episode_id}`
-[ ]     | **PUT**     | `/podcasts/{podcast_id}/episodes/{episode_id}`
-[ ]     | **DELETE**  | `/podcasts/{podcast_id}/episodes/{episode_id}`
-[ ]     | **POST**    | `/episodes`
-[ ]     | GET         | `/episodes?offset&limit`
-[ ]     | GET         | `/episodes/{episode_id}`
-[ ]     | **PUT**     | `/episodes/{episode_id}`
-[ ]     | **DELETE**  | `/episodes/{episode_id}`
-[ ]     | GET         | `/episodes/{episode_id}/cover`
-[ ]     | **PUT**     | `/episodes/{episode_id}/cover`
-[ ]     | GET         | `/episodes/{episode_id}/audio`
-[ ]     | **PUT**     | `/episodes/{episode_id}/audio`
+❌      | **POST**    | `/podcasts/{podcast_id}/episodes`
+❌      | GET         | `/podcasts/{podcast_id}/episodes?season&offset&limit`
+❌      | GET         | `/podcasts/{podcast_id}/episodes/{episode_id}`
+❌      | **PUT**     | `/podcasts/{podcast_id}/episodes/{episode_id}`
+❌      | **DELETE**  | `/podcasts/{podcast_id}/episodes/{episode_id}`
+❌      | **POST**    | `/episodes`
+❌      | GET         | `/episodes?offset&limit`
+❌      | GET         | `/episodes/{episode_id}`
+❌      | **PUT**     | `/episodes/{episode_id}`
+❌      | **DELETE**  | `/episodes/{episode_id}`
+❌      | GET         | `/episodes/{episode_id}/cover`
+❌      | **PUT**     | `/episodes/{episode_id}/cover`
+❌      | GET         | `/episodes/{episode_id}/audio`
+❌      | **PUT**     | `/episodes/{episode_id}/audio`
 
 ## Working Trace
 
