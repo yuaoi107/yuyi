@@ -2,7 +2,7 @@ from fastapi import HTTPException, UploadFile, status
 from fastapi.responses import RedirectResponse
 from sqlmodel import Session
 
-from ..utils.util import FileType, archive_file, delete_by_url, Message
+from ..common.util import FileType, archive_file, delete_by_url, Message
 from ..models.user import User
 
 

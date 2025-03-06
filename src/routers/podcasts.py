@@ -5,7 +5,7 @@ from fastapi import APIRouter, HTTPException, Query, status
 from sqlmodel import select
 
 from ..database.database import SessionDep
-from ..utils.util import add_responses, Message
+from ..common.util import add_responses, Message
 from ..models.podcast import (
     Podcast,
     PodcastUpload,

@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 
 from ..database.database import SessionDep
-from ..utils.auth import Token, authenticate_user, create_access_token
+from ..common.auth import Token, authenticate_user, create_access_token
 from ..config.settings import settings
 
 router = APIRouter(

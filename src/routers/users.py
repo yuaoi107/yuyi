@@ -3,9 +3,10 @@ from typing import Annotated
 from fastapi import APIRouter, Query, status, HTTPException
 
 from ..database.database import SessionDep
-from ..utils.util import add_responses, Message
-from ..utils.auth import UserDep
+from ..common.util import add_responses, Message, UserRole
+from ..common.auth import UserDep
 from ..models.user import (
+    User,
     UserUpload,
     UserPublic,
     UserPatch
@@ -16,6 +17,11 @@ router = APIRouter(
     prefix="/users",
     tags=["用户"]
 )
+
+
+def same_role_check(user_login: User, id):
+    if user_login.role != UserRole.ADMIN and user_login.id != id:
+        raise HTTPException(403)
 
 
 @router.post(
@@ -58,11 +64,10 @@ async def get_by_path(session: SessionDep, id: int):
     status_code=status.HTTP_200_OK,
     response_model=UserPublic,
     summary="修改用户",
-    responses=add_responses(404)
+    responses=add_responses(404, 409)
 )
 async def patch_by_path(user_login: UserDep, session: SessionDep, id: int, user: UserPatch):
-    if user_login.id != id:
-        raise HTTPException(status.HTTP_403_FORBIDDEN)
+    same_role_check(user_login, id)
     return UserService.update_user(session, id, user)
 
 
@@ -73,8 +78,9 @@ async def patch_by_path(user_login: UserDep, session: SessionDep, id: int, user:
     summary="删除用户",
     responses=add_responses(404)
 )
-async def delete_by_path(session: SessionDep, id: int):
-    return UserService.delete_user()
+async def delete_by_path(user_login: UserDep, session: SessionDep, id: int):
+    same_role_check(user_login, id)
+    return UserService.delete_user(session, id)
 
 
 # @router.get(

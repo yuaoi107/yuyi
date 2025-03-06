@@ -4,7 +4,7 @@ from fastapi import APIRouter, File, Query, UploadFile, status
 from fastapi.responses import RedirectResponse
 
 from ..database.database import SessionDep
-from ..utils.util import add_responses, Message
+from ..common.util import add_responses, Message
 from ..services.avatar_service import AvatarService
 
 router = APIRouter(

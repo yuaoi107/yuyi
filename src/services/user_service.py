@@ -3,8 +3,8 @@ from datetime import date
 from fastapi import HTTPException, status
 from sqlmodel import Session, select
 
-from ..utils.util import Message
-from ..utils.auth import hash_password
+from ..common.util import Message
+from ..common.auth import hash_password
 from ..models.user import (
     User,
     UserUpload,
@@ -54,8 +54,10 @@ class UserService:
         db_user = session.get(User, id)
 
         if not db_user:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="User not found.")
+            raise HTTPException(status.HTTP_404_NOT_FOUND, "User not found.")
+
+        if session.exec(select(User).where(User.nickname == user.nickname)).first():
+            raise HTTPException(status.HTTP_409_CONFLICT, "Nickname taken.")
 
         user_data = user.model_dump(exclude_unset=True)
         extra_data = {}
