@@ -4,6 +4,8 @@ from sqlmodel import Relationship, SQLModel, Field
 from pydantic import EmailStr
 from datetime import date
 
+from ..utils.util import UserRole
+
 if TYPE_CHECKING:
     from .podcast import Podcast, PodcastPublic
 
@@ -20,6 +22,7 @@ class User(UserBase, table=True):
     hashed_password: str
     avatar_url: str | None = None
     createtime: date
+    role: str | None = UserRole.USER.value
 
     podcasts: list["Podcast"] = Relationship(back_populates="author")
 

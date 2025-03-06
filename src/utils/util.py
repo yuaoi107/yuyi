@@ -9,6 +9,11 @@ from pydantic import BaseModel
 from ..config.settings import settings
 
 
+class UserRole(Enum):
+    ADMIN = "admin"
+    USER = "user"
+
+
 class FileType(Enum):
     AVATAR = "avatars"
     PODCAST_COVER = "podcast_covers"

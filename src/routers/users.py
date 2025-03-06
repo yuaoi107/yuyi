@@ -46,10 +46,10 @@ async def get_with_query(
     "/{id}",
     status_code=status.HTTP_200_OK,
     response_model=UserPublic,
-    summary="获取单个用户",
+    summary="获取用户",
     responses=add_responses(404)
 )
-async def get_by_id(session: SessionDep, id: int):
+async def get_by_path(session: SessionDep, id: int):
     return UserService.get_user(session, id)
 
 
@@ -60,7 +60,7 @@ async def get_by_id(session: SessionDep, id: int):
     summary="修改用户",
     responses=add_responses(404)
 )
-async def patch(user_login: UserDep, session: SessionDep, id: int, user: UserPatch):
+async def patch_by_path(user_login: UserDep, session: SessionDep, id: int, user: UserPatch):
     if user_login.id != id:
         raise HTTPException(status.HTTP_403_FORBIDDEN)
     return UserService.update_user(session, id, user)
@@ -73,7 +73,7 @@ async def patch(user_login: UserDep, session: SessionDep, id: int, user: UserPat
     summary="删除用户",
     responses=add_responses(404)
 )
-async def delete(session: SessionDep, id: int):
+async def delete_by_path(session: SessionDep, id: int):
     return UserService.delete_user()
 
 

@@ -20,7 +20,7 @@ router = APIRouter(
     summary="修改头像",
     responses=add_responses(404, 500)
 )
-async def create_avatar(
+async def put_with_query(
     session: SessionDep,
     user_id: Annotated[int, Query()],
     avatar: Annotated[UploadFile, File()]
@@ -35,5 +35,5 @@ async def create_avatar(
     summary="获取头像文件",
     responses=add_responses(404)
 )
-async def get_avatar(session: SessionDep, user_id: Annotated[int, Query()]):
+async def get_by_path(session: SessionDep, user_id: Annotated[int, Query()]):
     return AvatarService.get_avatar(session, user_id)

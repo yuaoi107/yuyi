@@ -5,6 +5,7 @@ description = "Yuyi is the RESTful API backend for a generic podcast hosting pla
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
+    "alembic>=1.15.1",
     "annotated-types==0.7.0",
     "anyio==4.8.0",
     "bcrypt==4.3.0",

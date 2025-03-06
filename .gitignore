@@ -10,5 +10,9 @@ wheels/
 .venv
 
 # Env files
-
 .env
+
+# Alembic
+
+alembic/
+alembic.ini
