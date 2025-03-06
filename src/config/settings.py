@@ -7,6 +7,7 @@ class Settings(BaseSettings):
     PROJECT_TITLE: str = ""
     PROJECT_SUMMARY: str = ""
     BASE_URL: str = ""
+    GENERATOR_TITLE: str = ""
 
     # Database
     PGDB_URL: str = ""

@@ -70,7 +70,7 @@ async def get_by_path(session: SessionDep, id: int | None = None):
     status_code=status.HTTP_200_OK,
     response_model=UserPublic,
     summary="修改用户",
-    responses=add_responses(401, 404, 409)
+    responses=add_responses(401, 403, 404, 409)
 )
 async def patch_by_path(user_login: UserDep, session: SessionDep, id: int, user: UserPatch):
     check_permission(user_login, id)
@@ -82,7 +82,7 @@ async def patch_by_path(user_login: UserDep, session: SessionDep, id: int, user:
     status_code=status.HTTP_200_OK,
     response_model=Message,
     summary="删除用户",
-    responses=add_responses(401, 404)
+    responses=add_responses(401, 403, 404)
 )
 async def delete_by_path(user_login: UserDep, session: SessionDep, id: int):
     check_permission(user_login, id)

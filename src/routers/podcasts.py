@@ -4,6 +4,10 @@ from typing import Annotated
 from fastapi import APIRouter, HTTPException, Query, status
 from sqlmodel import select
 
+from ..common.auth import UserDep
+from ..services.podcast_service import PodcastService
+from ..services.shared import get_target_user_id
+
 from ..database.database import SessionDep
 from ..common.util import add_responses, Message
 from ..models.podcast import (
@@ -19,10 +23,33 @@ router = APIRouter(
 )
 
 
-@router.post("", status_code=status.HTTP_201_CREATED, response_model=PodcastPublic, summary="创建播客",
-             responses=add_responses(409))
-async def create_podcast(session: SessionDep, podcast: PodcastUpload):
+@router.post(
+    "",
+    status_code=status.HTTP_201_CREATED,
+    response_model=PodcastPublic,
+    summary="创建播客",
+    responses=add_responses(401, 403, 409)
+)
+async def post(
+    user_login: UserDep,
+    session: SessionDep,
+    podcast: PodcastUpload,
+    user_id: Annotated[int | None, Query()] = None
+):
 
-    if session.exec(select(Podcast).where(Podcast.title == podcast.title)).first():
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT, detail="Title taken.")
+    target_user_id = get_target_user_id(user_login, user_id)
+    return PodcastService.create_podcast(session, target_user_id, podcast)
+
+
+@router.get(
+    "",
+    status_code=status.HTTP_200_OK,
+    response_model=list[PodcastPublic],
+    summary="获取播客列表"
+)
+async def get_with_query(
+    session: SessionDep,
+    offset: Annotated[int | None, Query()] = 0,
+    limit: Annotated[int | None, Query()] = 10
+):
+    return PodcastService.get_podcasts(session, offset, limit)

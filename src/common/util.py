@@ -28,7 +28,7 @@ class Message(BaseModel):
 
 def add_responses(*status_codes: int) -> dict[int, dict[str, Message]]:
     error_message = {"model": Message}
-    responses = {}
+    responses = {500: error_message}
     for code in status_codes:
         responses[code] = error_message
     return responses
