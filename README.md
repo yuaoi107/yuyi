@@ -81,3 +81,6 @@ Episode:
 - [ ] Episode APIs
 - [ ] Authentication & Authorization
 
+The password flow in OAuth2
+
+[JWT](https://jwt.io/)

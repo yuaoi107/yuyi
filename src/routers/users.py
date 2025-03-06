@@ -52,7 +52,8 @@ async def get_users(session: SessionDep, offset: Annotated[int, Query()] = 0, li
     return users
 
 
-@router.get("/{id}", status_code=status.HTTP_200_OK, response_model=UserPublic, summary="获取单个用户")
+@router.get("/{id}", status_code=status.HTTP_200_OK, response_model=UserPublic, summary="获取单个用户",
+            responses=add_responses(404))
 async def get_users(session: SessionDep, id: int):
     db_user = session.get(User, id)
     if not db_user:
@@ -86,7 +87,8 @@ async def patch_user(session: SessionDep, id: int, user: UserPatch):
     return db_user
 
 
-@router.delete("/{id}", status_code=status.HTTP_200_OK, response_model=Message, summary="删除用户", responses=add_responses(404))
+@router.delete("/{id}", status_code=status.HTTP_200_OK, response_model=Message, summary="删除用户",
+               responses=add_responses(404))
 async def delete_user(session: SessionDep, id: int):
 
     user = session.get(User, id)

@@ -19,6 +19,10 @@ router = APIRouter(
 )
 
 
-@router.get("/test")
-async def get():
-    return True
+@router.post("", status_code=status.HTTP_201_CREATED, response_model=PodcastPublic, summary="创建播客",
+             responses=add_responses(409))
+async def create_podcast(session: SessionDep, podcast: PodcastUpload):
+
+    if session.exec(select(Podcast).where(Podcast.title == podcast.title)).first():
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT, detail="Title taken.")
