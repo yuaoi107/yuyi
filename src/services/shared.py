@@ -4,6 +4,6 @@ from src.common.util import UserRole
 from src.models.user import User
 
 
-def permission_check(user_login: User, id):
+def check_permission(user_login: User) -> None:
     if user_login.role != UserRole.ADMIN and user_login.id != id:
         raise HTTPException(403)

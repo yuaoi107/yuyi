@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Query, status
+from fastapi import APIRouter, Path, Query, status
 
 from ..database.database import SessionDep
 from ..common.util import add_responses, Message
@@ -11,7 +11,7 @@ from ..models.user import (
     UserPatch
 )
 from ..services.user_service import UserService
-from ..services.shared import permission_check
+from ..services.shared import check_permission
 
 router = APIRouter(
     prefix="/users",
@@ -61,7 +61,7 @@ async def get_me(user_login: UserDep):
     summary="获取用户",
     responses=add_responses(404)
 )
-async def get_by_path(session: SessionDep, id: int):
+async def get_by_path(session: SessionDep, id: int | None = None):
     return UserService.get_user(session, id)
 
 
@@ -70,10 +70,10 @@ async def get_by_path(session: SessionDep, id: int):
     status_code=status.HTTP_200_OK,
     response_model=UserPublic,
     summary="修改用户",
-    responses=add_responses(404, 409)
+    responses=add_responses(401, 404, 409)
 )
 async def patch_by_path(user_login: UserDep, session: SessionDep, id: int, user: UserPatch):
-    permission_check(user_login, id)
+    check_permission(user_login, id)
     return UserService.update_user(session, id, user)
 
 
@@ -82,8 +82,8 @@ async def patch_by_path(user_login: UserDep, session: SessionDep, id: int, user:
     status_code=status.HTTP_200_OK,
     response_model=Message,
     summary="删除用户",
-    responses=add_responses(404)
+    responses=add_responses(401, 404)
 )
 async def delete_by_path(user_login: UserDep, session: SessionDep, id: int):
-    permission_check(user_login, id)
+    check_permission(user_login, id)
     return UserService.delete_user(session, id)
