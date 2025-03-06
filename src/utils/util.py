@@ -29,11 +29,6 @@ def add_responses(*status_codes: int) -> dict[int, dict[str, Message]]:
     return responses
 
 
-def hash_password(password: str) -> str:
-    encrypt_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-    return encrypt_context.hash(password)
-
-
 async def archive_file(file: UploadFile, filetype: FileType) -> str:
     try:
         ext = file.filename.split(".")[-1]

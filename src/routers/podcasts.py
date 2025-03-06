@@ -4,8 +4,8 @@ from typing import Annotated
 from fastapi import APIRouter, HTTPException, Query, status
 from sqlmodel import select
 
-from ..utils.dependables import SessionDep
-from ..utils.util import hash_password, add_responses, Message
+from ..database.database import SessionDep
+from ..utils.util import add_responses, Message
 from ..models.podcast import (
     Podcast,
     PodcastUpload,

@@ -3,7 +3,7 @@ from typing import Annotated
 from fastapi import APIRouter, File, HTTPException, Query, UploadFile, status
 from fastapi.responses import FileResponse, RedirectResponse
 
-from ..utils.dependables import SessionDep
+from ..database.database import SessionDep
 from ..utils.util import FileType, archive_file, delete_by_url, add_responses, Message
 from ..models.user import User
 

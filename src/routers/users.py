@@ -4,8 +4,9 @@ from typing import Annotated
 from fastapi import APIRouter, HTTPException, Query, status
 from sqlmodel import select
 
-from ..utils.dependables import SessionDep
-from ..utils.util import hash_password, add_responses, Message
+from ..database.database import SessionDep
+from ..utils.util import add_responses, Message
+from ..utils.auth import hash_password, UserDep
 from ..models.user import (
     User,
     UserUpload,
@@ -97,3 +98,8 @@ async def delete_user(session: SessionDep, id: int):
     session.delete(user)
     session.commit()
     return {"detail": "Successfully deleted"}
+
+
+@router.get("/users/me", response_model=UserPublic)
+async def get_user_me(user: UserDep):
+    return user

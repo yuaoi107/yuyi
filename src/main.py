@@ -6,7 +6,7 @@ from fastapi.staticfiles import StaticFiles
 from .models import *
 from .database.database import create_db_and_tables
 from .config.settings import settings
-from .routers import users, avatars, podcasts
+from .routers import users, avatars, podcasts, token
 
 create_db_and_tables()
 
@@ -28,6 +28,7 @@ app.mount(settings.ARCHIVE_ENDPOINT, StaticFiles(directory=settings.ARCHIVES_DIR
 for router in [
     users.router,
     avatars.router,
-    podcasts.router
+    podcasts.router,
+    token.router
 ]:
     app.include_router(router)
