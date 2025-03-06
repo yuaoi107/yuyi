@@ -13,6 +13,7 @@ create_db_and_tables()
 app = FastAPI(
     title=settings.PROJECT_TITLE,
     summary=settings.PROJECT_SUMMARY,
+    root_path="/api"
 )
 
 

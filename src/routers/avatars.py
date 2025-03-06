@@ -3,8 +3,8 @@ from typing import Annotated
 from fastapi import APIRouter, File, Query, UploadFile, status
 from fastapi.responses import RedirectResponse
 
-from src.common.auth import UserDep
-from src.services.shared import check_permission, get_target_user_id
+from ..common.auth import UserDep
+from ..services.shared import check_permission, get_target_user_id
 from ..database.database import SessionDep
 from ..common.util import add_responses, Message
 from ..services.avatar_service import AvatarService

@@ -43,3 +43,14 @@ class PodcastService:
     @staticmethod
     def get_podcasts(session: Session, offset: int, limit: int) -> list[PodcastPublic]:
         return session.exec(select(Podcast)).all()
+
+    @staticmethod
+    def get_podcast(session: Session, id: int) -> PodcastPublic:
+        db_podcast = session.get(Podcast, id)
+        if not db_podcast:
+            raise HTTPException(404, "Podcast not found.")
+        return db_podcast
+
+    @staticmethod
+    def update_podcast(session: Session, id: int) -> PodcastPublic:
+        pass

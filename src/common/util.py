@@ -27,10 +27,10 @@ class Message(BaseModel):
 
 
 def add_responses(*status_codes: int) -> dict[int, dict[str, Message]]:
-    error_message = {"model": Message}
-    responses = {500: error_message}
+    message = {"model": Message}
+    responses = {500: message}
     for code in status_codes:
-        responses[code] = error_message
+        responses[code] = message
     return responses
 
 

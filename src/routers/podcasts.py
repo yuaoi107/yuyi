@@ -53,3 +53,26 @@ async def get_with_query(
     limit: Annotated[int | None, Query()] = 10
 ):
     return PodcastService.get_podcasts(session, offset, limit)
+
+
+@router.get(
+    "/{id}",
+    status_code=status.HTTP_200_OK,
+    response_model=PodcastPublic,
+    summary="获取播客",
+    responses=add_responses(404)
+)
+async def get_by_path(session: SessionDep, id: int):
+    return PodcastService.get_podcast(session, id)
+
+
+@router.patch(
+    "/{id}",
+    status_code=status.HTTP_200_OK,
+    response_model=PodcastPublic,
+    summary="修改播客",
+    responses=add_responses(401, 403, 404, 409)
+)
+async def patch_by_path(user_login: UserDep, session: SessionDep, id: int):
+    target_user_id = get_target_user_id(user_login, id)
+    return PodcastService.update_podcast(session, id)

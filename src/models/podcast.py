@@ -42,8 +42,9 @@ class PodcastUpload(PodcastBase):
 
 class PodcastPublic(PodcastBase):
     id: int
+    author_id: int
     itunes_image_url: str
-    feed_url: str | None
+    feed_url: str
     createtime: date
     itunes_complete: bool
     createtime: date
