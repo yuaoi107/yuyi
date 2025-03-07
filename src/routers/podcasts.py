@@ -81,4 +81,4 @@ async def get_podcast_cover(session: SessionDep, id: int):
 @router.put("/podcasts/{id}/cover", status_code=status.HTTP_200_OK, response_model=Message, summary="修改指定播客封面")
 async def put_podcast_cover(user_login: UserDep, session: SessionDep, id: int, avatar_update: UploadFile):
     podcast_service = PodcastService(session, user_login)
-    podcast_service.update_cover_by_id(id, avatar_update)
+    return await podcast_service.update_cover_by_id(id, avatar_update)

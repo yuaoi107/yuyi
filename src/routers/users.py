@@ -3,16 +3,16 @@ from typing import Annotated
 from fastapi import APIRouter, HTTPException, Query, UploadFile, status
 from fastapi.responses import FileResponse
 
-from ..core.constants import UserRole
-from ..database.database import SessionDep
-from ..core.util import add_responses, Message
-from ..core.auth import UserDep
-from ..models.user import (
+from src.core.constants import UserRole
+from src.database.database import SessionDep
+from src.core.constants import Message
+from src.core.auth import UserDep
+from src.models.user import (
     UserCreate,
     UserPublic,
     UserUpdate
 )
-from ..services.crud.user_service import UserService
+from src.services.user_service import UserService
 
 router = APIRouter(
     prefix="/users",
@@ -20,141 +20,72 @@ router = APIRouter(
 )
 
 
-@router.post(
-    "",
-    status_code=status.HTTP_201_CREATED,
-    response_model=UserPublic, summary="创建用户",
-    responses=add_responses(409)
-)
+@router.post("", status_code=status.HTTP_201_CREATED, response_model=UserPublic, summary="创建用户")
 async def post_user(session: SessionDep, user: UserCreate):
-    return UserService.create_user(session, user)
+    user_service = UserService(session)
+    return user_service.create_user(user)
 
 
-@router.get(
-    "",
-    status_code=status.HTTP_200_OK,
-    response_model=list[UserPublic],
-    summary="获取用户列表"
-)
-async def get_users_with_query(
-    session: SessionDep,
-    offset: Annotated[int, Query()] = 0,
-    limit: Annotated[int, Query()] = 10
-):
-    return UserService.get_users(session, offset, limit)
+@router.get("", status_code=status.HTTP_200_OK, response_model=list[UserPublic], summary="获取用户列表")
+async def get_users_with_query(session: SessionDep, offset: Annotated[int, Query()] = 0, limit: Annotated[int, Query()] = 10):
+    user_service = UserService(session)
+    return user_service.get_all_users(offset, limit)
 
 
-@router.get(
-    "/me",
-    status_code=status.HTTP_200_OK,
-    response_model=UserPublic,
-    summary="获取当前用户",
-    responses=add_responses(401)
-)
+@router.get("/me", status_code=status.HTTP_200_OK, response_model=UserPublic, summary="获取当前用户")
 async def get_user_me(user_login: UserDep):
     return user_login
 
 
-@router.put(
-    "/me",
-    status_code=status.HTTP_200_OK,
-    response_model=UserPublic,
-    summary="修改当前用户",
-    responses=add_responses(401)
-)
+@router.put("/me", status_code=status.HTTP_200_OK, response_model=UserPublic, summary="修改当前用户")
 async def put_user_me(user_login: UserDep, session: SessionDep, user_update: UserUpdate):
-    return UserService.update_user(session, user_login.id, user_update)
+    user_service = UserService(session, user_login)
+    return user_service.update_user_by_id(user_login.id, user_update)
 
 
-@router.delete(
-    "/me",
-    status_code=status.HTTP_200_OK,
-    response_model=Message,
-    summary="删除当前用户",
-    responses=add_responses(401)
-)
+@router.delete("/me", status_code=status.HTTP_200_OK, response_model=Message, summary="删除当前用户")
 async def delete_user_me(user_login: UserDep, session: SessionDep):
-    return UserService.delete_user(session, user_login.id)
+    user_service = UserService(session, user_login)
+    return user_service.delete_user_by_id(user_login.id)
 
 
-@router.put(
-    "/me/avatar",
-    status_code=status.HTTP_200_OK,
-    response_model=Message,
-    summary="修改当前用户头像",
-    responses=add_responses(401)
-)
+@router.put("/me/avatar", status_code=status.HTTP_200_OK, response_model=Message, summary="修改当前用户头像")
 async def put_user_me_avatar(user_login: UserDep, session: SessionDep, avatar_update: UploadFile):
-    return await UserService.update_user_avatar(session, user_login.id, avatar_update)
+    user_service = UserService(session, user_login)
+    return await user_service.update_avatar_by_id(user_login.id, avatar_update)
 
 
-@router.get(
-    "/me/avatar",
-    status_code=status.HTTP_200_OK,
-    response_class=FileResponse,
-    summary="获取当前用户头像",
-    responses=add_responses(401, 404)
-)
+@router.get("/me/avatar", status_code=status.HTTP_200_OK, response_class=FileResponse, summary="获取当前用户头像")
 async def get_user_me_avatar(user_login: UserDep, session: SessionDep):
-    return UserService.get_user_avatar(session, user_login.id)
+    user_service = UserService(session, user_login)
+    return user_service.get_avatar_by_id(user_login.id)
 
 
-@router.get(
-    "/{user_id}",
-    status_code=status.HTTP_200_OK,
-    response_model=UserPublic,
-    summary="获取指定用户",
-    responses=add_responses(404)
-)
-async def get_user_by_path(session: SessionDep, user_id: int):
-    return UserService.get_user(session, user_id)
+@router.get("/{id}", status_code=status.HTTP_200_OK, response_model=UserPublic, summary="获取指定用户")
+async def get_user_by_path(session: SessionDep, id: int):
+    user_service = UserService(session)
+    return user_service.get_avatar_by_id(id)
 
 
-@router.put(
-    "/{user_id}",
-    status_code=status.HTTP_200_OK,
-    response_model=UserPublic,
-    summary="修改指定用户",
-    responses=add_responses(401, 403, 404, 409)
-)
-async def put_user_by_path(user_login: UserDep, session: SessionDep, user_id: int, user_update: UserUpdate):
-    if user_login.role != UserRole.ADMIN.value and user_login.id != user_id:
-        raise HTTPException(403)
-    return UserService.update_user(session, user_id, user_update)
+@router.put("/{id}", status_code=status.HTTP_200_OK, response_model=UserPublic, summary="修改指定用户")
+async def put_user_by_path(user_login: UserDep, session: SessionDep, id: int, user_update: UserUpdate):
+    user_service = UserService(session, user_login)
+    return user_service.update_user_by_id(id, user_update)
 
 
-@router.delete(
-    "/{user_id}",
-    status_code=status.HTTP_200_OK,
-    response_model=Message,
-    summary="删除指定用户",
-    responses=add_responses(401, 403, 404)
-)
-async def delete_user_by_path(user_login: UserDep, session: SessionDep, user_id: int):
-    if user_login.role != UserRole.ADMIN.value and user_login.id != user_id:
-        raise HTTPException(403)
-    return UserService.delete_user(session, user_id)
+@router.delete("/{id}", status_code=status.HTTP_200_OK, response_model=Message, summary="删除指定用户")
+async def delete_user_by_path(user_login: UserDep, session: SessionDep, id: int):
+    user_service = UserService(session, user_login)
+    return user_service.delete_user_by_id(id)
 
 
-@router.get(
-    "/{user_id}/avatar",
-    status_code=status.HTTP_200_OK,
-    response_class=FileResponse,
-    summary="获取指定用户头像",
-    responses=add_responses(404)
-)
-async def get_user_avatar_by_path(session: SessionDep, user_id: int):
-    return UserService.get_user_avatar(session, user_id)
+@router.get("/{id}/avatar", status_code=status.HTTP_200_OK, response_class=FileResponse, summary="获取指定用户头像")
+async def get_user_avatar_by_path(session: SessionDep, id: int):
+    user_service = UserService(session)
+    return user_service.get_avatar_by_id(id)
 
 
-@router.put(
-    "/{user_id}/avatar",
-    status_code=status.HTTP_200_OK,
-    response_model=Message,
-    summary="修改指定用户头像",
-    responses=add_responses(401, 403, 404)
-)
-async def put_user_avatar_by_path(user_login: UserDep, session: SessionDep, user_id: int, avatar_update: UploadFile):
-    if user_login.role != UserRole.ADMIN.value and user_login.id != user_id:
-        raise HTTPException(403)
-    return UserService.update_user_avatar(session, user_id, avatar_update)
+@router.put("/{id}/avatar", status_code=status.HTTP_200_OK, response_model=Message, summary="修改指定用户头像")
+async def put_user_avatar_by_path(user_login: UserDep, session: SessionDep, id: int, avatar_update: UploadFile):
+    user_service = UserService(session, user_login)
+    return user_service.update_avatar_by_id(id)
