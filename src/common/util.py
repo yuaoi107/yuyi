@@ -21,7 +21,7 @@ async def save_file_to_contents(file: UploadFile, content_filetype: ContentFileT
         ext = file.filename.split(".")[-1]
         unique_filename = f"{uuid.uuid4().hex}.{ext}"
 
-        dest_dir = os.path.join(settings.CONTENTS_DIR, filetype.value)
+        dest_dir = os.path.join(settings.CONTENTS_DIR, content_filetype.value)
 
         if not os.path.exists(dest_dir):
             os.makedirs(dest_dir)

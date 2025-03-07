@@ -35,7 +35,6 @@ class UserUpload(UserBase):
 class UserPublic(UserBase):
     id: int
     username: str
-    avatar_url: str | None = None
     createtime: date
     role: str
 

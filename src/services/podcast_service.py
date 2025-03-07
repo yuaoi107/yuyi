@@ -23,10 +23,10 @@ class PodcastService:
 
         extra_data = {
             "author_id": user_db.id,
-            "feed_url": "fake",
+            "feed_path": "fake",
             "link": "fake",
             "itunes_author": user_db.nickname,
-            "itunes_image_url": "fake",
+            "itunes_image_path": "fake",
             "createtime": date.today().isoformat(),
             "generator": settings.GENERATOR_TITLE
         }
@@ -58,6 +58,9 @@ class PodcastService:
         podcast_db = PodcastService.get_podcast(session, podcast_id)
         podcast_db.sqlmodel_update(
             podcast_update.model_dump(exclude_unset=True))
+        session.add(podcast_db)
+        session.commit()
+        return podcast_db
 
     @staticmethod
     def delete_podcast(session: Session, podcast_id: int) -> Message:
@@ -69,14 +72,21 @@ class PodcastService:
     @staticmethod
     def get_podcast_cover(session: Session, podcast_id: int) -> FileResponse:
         podcast_db = PodcastService.get_podcast(session, podcast_id)
-        if not podcast_db.itunes_image_url:
+        if not podcast_db.itunes_image_path:
             raise HTTPException(404, "Cover not found.")
         return FileResponse(podcast_db.itunes_image_path)
 
     @staticmethod
     async def update_podcast_cover(session: Session, podcast_id: int, avatar_update: UploadFile) -> Message:
         podcast_db = PodcastService.get_podcast(session, podcast_id)
-        if podcast_db.itunes_image_path:
-            delete_file_from_contents(podcast_db.itunes_image_path)
-        podcast_db.itunes_image_path = await save_file_to_contents(avatar_update, ContentFileType.PODCAST_COVER)
+        try:
+            if podcast_db.itunes_image_path:
+                delete_file_from_contents(podcast_db.itunes_image_path)
+            podcast_db.itunes_image_path = await save_file_to_contents(avatar_update, ContentFileType.PODCAST_COVER)
+        except Exception:
+            raise HTTPException(500, "Cover change failed.")
+
+        session.add(podcast_db)
+        session.commit()
+
         return Message(detail="Cover changed.")

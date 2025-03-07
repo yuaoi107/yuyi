@@ -24,8 +24,8 @@ class Podcast(PodcastBase, table=True):
     id: int | None = Field(default=None, primary_key=True)
     author_id: int | None = Field(default=None, foreign_key="user.id")
     itunes_image_path: str | None = None
-    feed_path: str
-    link: str
+    feed_path: str | None = None
+    link: str | None = None
     itunes_author: str
     itunes_block: bool = False
     itunes_complete: bool = False
@@ -43,8 +43,6 @@ class PodcastUpload(PodcastBase):
 class PodcastPublic(PodcastBase):
     id: int
     author_id: int
-    itunes_image_url: str
-    feed_url: str
     createtime: date
     itunes_complete: bool
     createtime: date

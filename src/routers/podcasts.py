@@ -1,7 +1,7 @@
 from datetime import date
 from typing import Annotated
 
-from fastapi import APIRouter, HTTPException, Query, status
+from fastapi import APIRouter, HTTPException, Query, UploadFile, status
 from fastapi.responses import FileResponse
 from sqlmodel import select
 
@@ -21,6 +21,33 @@ from ..models.podcast import (
 router = APIRouter(
     tags=["播客"]
 )
+
+
+@router.post(
+    "/users/me/podcasts",
+    status_code=status.HTTP_201_CREATED,
+    response_model=PodcastPublic,
+    summary="为当前用户创建播客",
+    responses=add_responses(401)
+)
+async def post_user_me_podcast(user_login: UserDep, session: SessionDep, podcast_upload: PodcastUpload):
+    return PodcastService.create_podcast(session, user_login.id, podcast_upload)
+
+
+@router.get(
+    "/users/me/podcasts",
+    status_code=status.HTTP_201_CREATED,
+    response_model=list[PodcastPublic],
+    summary="获取当前用户播客列表",
+    responses=add_responses(401)
+)
+async def get_user_me_podcasts(
+    user_login: UserDep,
+    session: SessionDep,
+    offset: Annotated[int, Query()] = 0,
+    limit: Annotated[int, Query()] = 10
+):
+    return PodcastService.get_user_podcasts(session, user_login.id, offset, limit)
 
 
 @router.post(
@@ -145,36 +172,8 @@ async def get_podcast_cover(session: SessionDep, podcast_id: int):
     summary="修改指定播客封面",
     responses=add_responses(401, 403, 404)
 )
-async def put_podcast_cover(user_login: UserDep, session: SessionDep, podcast_id: int):
+async def put_podcast_cover(user_login: UserDep, session: SessionDep, podcast_id: int, avatar_update: UploadFile):
     podcast_db = PodcastService.get_podcast(session, podcast_id)
     if user_login.role != UserRole.ADMIN and user_login.id != podcast_db.author_id:
         raise HTTPException(403)
-    return await PodcastService.update_podcast_cover(session, podcast_id)
-
-
-@router.post(
-    "/users/me/podcasts",
-    status_code=status.HTTP_201_CREATED,
-    response_model=PodcastPublic,
-    summary="为当前用户创建播客",
-    responses=add_responses(401)
-)
-async def post_user_me_podcast(user_login: UserDep, session: SessionDep, podcast_upload: PodcastUpload):
-    return PodcastService.create_podcast(session, user_login.id, podcast_upload)
-
-
-@router.get(
-    "/users/me/podcasts",
-    status_code=status.HTTP_201_CREATED,
-    response_model=PodcastPublic,
-    summary="获取当前用户播客列表",
-    responses=add_responses(401)
-)
-async def get_user_me_podcasts(
-    user_login: UserDep,
-    session: SessionDep,
-    podcast_upload: PodcastUpload,
-    offset: Annotated[int, Query()] = 0,
-    limit: Annotated[int, Query()] = 10
-):
-    return PodcastService.get_user_podcasts(session, user_login.id, offset, limit)
+    return await PodcastService.update_podcast_cover(session, podcast_id, avatar_update)

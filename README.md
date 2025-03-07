@@ -1,10 +1,10 @@
-# Yuyi Project README
+# 雨呓
 
-Yuyi is the RESTful API backend for a generic podcast hosting platform.
+雨呓（Yuyi）是一个泛用型播客托管平台的 RESTful API 后端。
 
-## APIs Design
+## API 设计
 
-### User
+### 用户
 
 State   | Method      | Endpoint
 --------|-------------|-----
@@ -21,13 +21,13 @@ State   | Method      | Endpoint
 ✅      | GET         | `/users/{user_id}/avatar`
 ✅      | **PUT**     | `/users/{user_id}/avatar`
 
-### Podcast
+### 播客
 
 State   | Method      | Endpoint
 --------|-------------|-----
 ✅      | **POST**    | `/users/{user_id}/podcasts`
 ✅      | GET         | `/users/{user_id}/podcasts?offset&limit`
-✅      | **POST**    | `/podcasts`
+✅      | **POST**    | `/podcasts?author_id`
 ✅      | **GET**     | `/podcasts?offset&limit`
 ✅      | GET         | `/podcasts/{podcast_id}`
 ✅      | **PUT**     | `/podcasts/{podcast_id}`
@@ -38,7 +38,7 @@ State   | Method      | Endpoint
 ✅      | **POST**    | `/users/me/podcasts`
 ✅      | GET         | `/users/me/podcasts?offset&limit`
 
-### Episode
+### 单集
 
 State   | Method      | Endpoint
 --------|-------------|-----
@@ -47,7 +47,7 @@ State   | Method      | Endpoint
 ❌      | GET         | `/podcasts/{podcast_id}/episodes/{episode_id}`
 ❌      | **PUT**     | `/podcasts/{podcast_id}/episodes/{episode_id}`
 ❌      | **DELETE**  | `/podcasts/{podcast_id}/episodes/{episode_id}`
-❌      | **POST**    | `/episodes`
+❌      | **POST**    | `/episodes?podcast_id`
 ❌      | GET         | `/episodes?offset&limit`
 ❌      | GET         | `/episodes/{episode_id}`
 ❌      | **PUT**     | `/episodes/{episode_id}`

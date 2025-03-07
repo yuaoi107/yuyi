@@ -87,10 +87,12 @@ class UserService:
     @staticmethod
     async def update_user_avatar(session: Session, user_id: int, avatar_update: UploadFile) -> Message:
         user_db = UserService.get_user(session, user_id)
-        if user_db.avatar_path:
-            delete_file_from_contents(user_db.avatar_path)
-        user_db.avatar_path = await save_file_to_contents(
-            avatar_update, ContentFileType.AVATAR)
+        try:
+            if user_db.avatar_path:
+                delete_file_from_contents(user_db.avatar_path)
+            user_db.avatar_path = await save_file_to_contents(avatar_update, ContentFileType.AVATAR)
+        except Exception:
+            raise HTTPException(500, "Avatar change failed.")
 
         session.add(user_db)
         session.commit()
