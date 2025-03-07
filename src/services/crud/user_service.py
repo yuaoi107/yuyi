@@ -6,9 +6,9 @@ from sqlmodel import Session, select
 
 from src.common.constants import ContentFileType
 
-from ..common.util import Message, save_file_to_contents, delete_file_from_contents
-from ..common.auth import hash_password
-from ..models.user import (
+from ...common.util import Message, save_file_to_contents, delete_file_from_contents
+from ...common.auth import hash_password
+from ...models.user import (
     User,
     UserUpload,
     UserUpdate

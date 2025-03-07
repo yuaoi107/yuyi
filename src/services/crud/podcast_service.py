@@ -8,8 +8,8 @@ from sqlmodel import Session, select
 from src.common.util import delete_file_from_contents, save_file_to_contents
 from src.models.podcast import Podcast, PodcastPublic, PodcastUpdate, PodcastUpload
 from src.models.user import User
-from ..config.settings import settings
-from ..common.constants import Message, ContentFileType
+from ...config.settings import settings
+from ...common.constants import Message, ContentFileType
 
 
 class PodcastService:

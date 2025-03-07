@@ -10,7 +10,7 @@ from ..config.settings import settings
 
 router = APIRouter(
     prefix="/token",
-    tags=["Token"]
+    tags=["认证"]
 )
 
 

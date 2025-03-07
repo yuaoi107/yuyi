@@ -2,8 +2,8 @@ from fastapi import HTTPException, UploadFile, status
 from fastapi.responses import RedirectResponse
 from sqlmodel import Session
 
-from ..common.util import ContentFileType, archive_file, delete_by_url, Message
-from ..models.user import User
+from ...common.util import ContentFileType, archive_file, delete_by_url, Message
+from ...models.user import User
 
 
 class AvatarService:

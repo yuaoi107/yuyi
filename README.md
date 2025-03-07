@@ -44,9 +44,6 @@ State   | Method      | Endpoint
 --------|-------------|-----
 ❌      | **POST**    | `/podcasts/{podcast_id}/episodes`
 ❌      | GET         | `/podcasts/{podcast_id}/episodes?season&offset&limit`
-❌      | GET         | `/podcasts/{podcast_id}/episodes/{episode_id}`
-❌      | **PUT**     | `/podcasts/{podcast_id}/episodes/{episode_id}`
-❌      | **DELETE**  | `/podcasts/{podcast_id}/episodes/{episode_id}`
 ❌      | **POST**    | `/episodes?podcast_id`
 ❌      | GET         | `/episodes?offset&limit`
 ❌      | GET         | `/episodes/{episode_id}`
