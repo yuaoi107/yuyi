@@ -4,7 +4,7 @@ from sqlmodel import Relationship, SQLModel, Field
 from pydantic import EmailStr
 from datetime import date
 
-from ..common.util import UserRole
+from ..common.constants import UserRole
 
 if TYPE_CHECKING:
     from .podcast import Podcast, PodcastPublic
@@ -20,7 +20,7 @@ class User(UserBase, table=True):
     id: int | None = Field(default=None, primary_key=True)
     username: str
     hashed_password: str
-    avatar_url: str | None = None
+    avatar_path: str | None = None
     createtime: date
     role: str | None = UserRole.USER.value
 
@@ -44,7 +44,7 @@ class UserPublicWithPodcasts(UserPublic):
     podcasts: list["PodcastPublic"] = []
 
 
-class UserPatch(SQLModel):
+class UserUpdate(SQLModel):
     nickname: str | None = None
     email: EmailStr | None = None
     description: str | None = None

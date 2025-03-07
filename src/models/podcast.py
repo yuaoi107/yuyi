@@ -23,8 +23,8 @@ class Podcast(PodcastBase, table=True):
 
     id: int | None = Field(default=None, primary_key=True)
     author_id: int | None = Field(default=None, foreign_key="user.id")
-    itunes_image_url: str | None = None
-    feed_url: str
+    itunes_image_path: str | None = None
+    feed_path: str
     link: str
     itunes_author: str
     itunes_block: bool = False
@@ -56,7 +56,7 @@ class PodcastPublicWithAuthor(PodcastPublic):
     author: Optional["User"] = None
 
 
-class PodcastPatch(SQLModel):
+class PodcastUpdate(SQLModel):
 
     title: str | None = None
     description: str | None = None

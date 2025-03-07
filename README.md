@@ -15,6 +15,11 @@ State   | Method      | Endpoint
 ❌      | **DELETE**  | `/users/{user_id}`
 ❌      | GET         | `/users/{user_id}/avatar`
 ❌      | **PUT**     | `/users/{user_id}/avatar`
+❌      | **GET**     | `/users/me`
+❌      | **PUT**     | `/users/me`
+❌      | **DELETE**  | `/users/me`
+❌      | **PUT**     | `/users/me/avatar`
+❌      | **GET**     | `/users/me/avatar`
 
 ### Podcast
 
@@ -33,6 +38,8 @@ State   | Method      | Endpoint
 ❌      | GET         | `/podcasts/{podcast_id}/cover`
 ❌      | **PUT**     | `/podcasts/{podcast_id}/cover`
 ❌      | GET         | `/podcasts/{podcast_id}/rss`
+❌      | **POST**    | `/users/me/podcasts`
+❌      | **GET**     | `/users/me/podcasts`
 
 ### Episode
 

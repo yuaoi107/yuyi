@@ -13,8 +13,7 @@ class Settings(BaseSettings):
     PGDB_URL: str = ""
 
     # Static files dir
-    ARCHIVES_DIR: str = ""
-    ARCHIVE_ENDPOINT: str = ""
+    CONTENTS_DIR: str = ""
 
     # Authentication & Authorization
     SECRET_KEY: str = ""

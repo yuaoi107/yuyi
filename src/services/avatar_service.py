@@ -14,13 +14,13 @@ class AvatarService:
         if not db_user:
             raise HTTPException(status.HTTP_404_NOT_FOUND, "User not found.")
         try:
-            if db_user.avatar_url:
-                delete_by_url(db_user.avatar_url)
+            if db_user.avatar_path:
+                delete_by_url(db_user.avatar_path)
             avatar_url = await archive_file(avatar, FileType.AVATAR)
         except Exception:
             raise HTTPException(
                 status.HTTP_500_INTERNAL_SERVER_ERROR, "Failed to save file.")
-        db_user.avatar_url = avatar_url
+        db_user.avatar_path = avatar_url
         session.add(db_user)
         session.commit()
         return {"detail": "Avatar changed."}
@@ -30,4 +30,4 @@ class AvatarService:
         db_user = session.get(User, user_id)
         if not db_user:
             raise HTTPException(status.HTTP_404_NOT_FOUND, "User not found.")
-        return RedirectResponse(db_user.avatar_url)
+        return RedirectResponse(db_user.avatar_path)

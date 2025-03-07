@@ -14,7 +14,7 @@ from ..models.podcast import (
     Podcast,
     PodcastUpload,
     PodcastPublic,
-    PodcastPatch
+    PodcastUpdate
 )
 
 router = APIRouter(

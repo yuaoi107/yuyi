@@ -23,8 +23,8 @@ async def check_app_state(key: Annotated[str, Query()]):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
     return {"state": "fine"}
 
-app.mount(settings.ARCHIVE_ENDPOINT, StaticFiles(directory=settings.ARCHIVES_DIR),
-          name="archives")
+# app.mount(settings.ARCHIVE_ENDPOINT, StaticFiles(directory=settings.CONTENTS_DIR),
+#           name="archives")
 
 for router in [
     users.router,

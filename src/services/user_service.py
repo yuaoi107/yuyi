@@ -8,7 +8,7 @@ from ..common.auth import hash_password
 from ..models.user import (
     User,
     UserUpload,
-    UserPatch
+    UserUpdate
 )
 
 
@@ -16,12 +16,10 @@ class UserService:
     @staticmethod
     def create_user(session: Session, user: UserUpload) -> User:
         if session.exec(select(User).where(User.username == user.username)).first():
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT, detail="Username taken.")
+            raise HTTPException(status.HTTP_409_CONFLICT, "Username taken.")
 
         if session.exec(select(User).where(User.nickname == user.nickname)).first():
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT, detail="Nickname taken.")
+            raise HTTPException(status.HTTP_409_CONFLICT, "Nickname taken.")
 
         hashed_password = hash_password(user.password)
         extra_data = {
@@ -45,12 +43,11 @@ class UserService:
     def get_user(session: Session, id: int) -> User:
         db_user = session.get(User, id)
         if not db_user:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="User not found.")
+            raise HTTPException(status.HTTP_404_NOT_FOUND, "User not found.")
         return db_user
 
     @staticmethod
-    def update_user(session: Session, id: int, user: UserPatch) -> User:
+    def update_user(session: Session, id: int, user: UserUpdate) -> User:
         db_user = session.get(User, id)
 
         if not db_user:

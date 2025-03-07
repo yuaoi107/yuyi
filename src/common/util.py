@@ -7,23 +7,7 @@ from pydantic import BaseModel
 
 
 from ..config.settings import settings
-
-
-class UserRole(Enum):
-    ADMIN = "admin"
-    USER = "user"
-
-
-class FileType(Enum):
-    AVATAR = "avatars"
-    PODCAST_COVER = "podcast_covers"
-    EPISODE_COVER = "episode_covers"
-    AUDIO = "audios"
-    RSS_XML = "rss_xmls"
-
-
-class Message(BaseModel):
-    detail: str
+from .constants import Message, FileType
 
 
 def add_responses(*status_codes: int) -> dict[int, dict[str, Message]]:
@@ -34,27 +18,23 @@ def add_responses(*status_codes: int) -> dict[int, dict[str, Message]]:
     return responses
 
 
-async def archive_file(file: UploadFile, filetype: FileType) -> str:
+async def save_file_to_contents(file: UploadFile, filetype: FileType) -> str:
     try:
         ext = file.filename.split(".")[-1]
-
         unique_filename = f"{uuid.uuid4().hex}.{ext}"
 
-        dest_dir = os.path.join(settings.ARCHIVES_DIR, filetype.value)
+        dest_dir = os.path.join(settings.CONTENTS_DIR, filetype.value)
 
         if not os.path.exists(dest_dir):
             os.makedirs(dest_dir)
 
-        file_path = os.path.join(
-            dest_dir,
-            unique_filename
-        )
+        file_path = os.path.join(dest_dir, unique_filename)
 
         with open(file_path, 'wb') as f:
             contents = await file.read()
             f.write(contents)
 
-        return "/".join([settings.BASE_URL + settings.ARCHIVE_ENDPOINT, filetype.value, unique_filename])
+        return file_path
 
     except Exception as e:
         raise
@@ -62,6 +42,5 @@ async def archive_file(file: UploadFile, filetype: FileType) -> str:
         await file.close()
 
 
-def delete_by_url(url: str):
-    filepath = settings.ARCHIVES_DIR + "/" + "/".join(url.split("/")[-2:])
-    os.remove(filepath)
+def delete_file_from_contents(file_path: str):
+    os.remove(file_path)

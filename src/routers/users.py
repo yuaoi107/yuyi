@@ -8,7 +8,7 @@ from ..common.auth import UserDep
 from ..models.user import (
     UserUpload,
     UserPublic,
-    UserPatch
+    UserUpdate
 )
 from ..services.user_service import UserService
 from ..services.shared import check_permission
@@ -72,7 +72,7 @@ async def get_by_path(session: SessionDep, id: int | None = None):
     summary="修改用户",
     responses=add_responses(401, 403, 404, 409)
 )
-async def patch_by_path(user_login: UserDep, session: SessionDep, id: int, user: UserPatch):
+async def patch_by_path(user_login: UserDep, session: SessionDep, id: int, user: UserUpdate):
     check_permission(user_login, id)
     return UserService.update_user(session, id, user)
 
