@@ -1,94 +1,143 @@
 from datetime import date
-from fastapi import HTTPException, UploadFile, status
+from fastapi import UploadFile
 from fastapi.responses import FileResponse
 from sqlmodel import Session, select
 
-from ...services.crud.episodes_service import EpisodeService
-from ...common.util import delete_file_from_contents, save_file_to_contents
-from ...models.podcast import Podcast, PodcastUpdate, PodcastCreate
-from ...services.crud.user_service import UserService
-from ...config.settings import settings
-from ...common.constants import Message, ContentFileType
+from src.models.episode import Episode
+from src.models.user import User
+from src.common.util import delete_file_from_contents, save_file_to_contents
+from src.models.podcast import Podcast, PodcastUpdate, PodcastCreate
+from src.config.settings import settings
+from src.common.constants import Message, ContentFileType, UserRole
+from src.common.exceptions import (
+    CoverNotFoundException,
+    NoPermissionException,
+    PodcastNotFoundException,
+    UserNotFoundException,
+    NameAlreadyExistsException
+)
 
 
 class PodcastService:
-    @staticmethod
-    def create_podcast(session: Session, author_id: int, podcast_upload: PodcastCreate) -> Podcast:
-        user_db = UserService.get_user(session, author_id)
 
-        if session.exec(select(Podcast).where(Podcast.title == podcast_upload.title)).first():
-            raise HTTPException(status.HTTP_409_CONFLICT, "Title taken.")
+    def __init__(self, session: Session, user_login: User):
+        self.session = session
+        self.user_login = user_login
+
+    def create_podcast_by_author_id(self, author_id: int, podcast_upload: PodcastCreate) -> Podcast:
+
+        if self.user_login.id != author_id and self.user_login.role != UserRole.ADMIN.value:
+            raise NoPermissionException()
+
+        author = self._get_user_by_id(author_id)
+
+        same_name_podcast = self.session.exec(
+            select(Podcast).where(Podcast.title == podcast_upload.title)
+        ).first()
+        if same_name_podcast:
+            raise NameAlreadyExistsException()
 
         extra_data = {
-            "author_id": user_db.id,
-            "itunes_author": user_db.nickname,
+            "author_id": author.id,
+            "itunes_author": author.nickname,
             "createtime": date.today().isoformat(),
             "generator": settings.GENERATOR_TITLE
         }
 
         new_podcast = Podcast.model_validate(podcast_upload, update=extra_data)
-        session.add(new_podcast)
-        session.commit()
-        session.refresh(new_podcast)
+        self.session.add(new_podcast)
+        self.session.commit()
+        self.session.refresh(new_podcast)
 
         return new_podcast
 
-    @staticmethod
-    def get_user_podcasts(session: Session, author_id: int, offset: int, limit: int) -> list[Podcast]:
-        return session.exec(select(Podcast).where(Podcast.author_id == author_id)).all()
+    def get_podcasts_by_author_id(self, author_id: int, offset: int, limit: int) -> list[Podcast]:
 
-    @staticmethod
-    def get_podcasts(session: Session, offset: int, limit: int) -> list[Podcast]:
-        return session.exec(select(Podcast)).all()
+        return self.session.exec(
+            select(Podcast).where(Podcast.author_id == author_id)
+        ).all()
 
-    @staticmethod
-    def get_podcast(session: Session, podcast_id: int) -> Podcast:
-        db_podcast = session.get(Podcast, podcast_id)
-        if not db_podcast:
-            raise HTTPException(404, "Podcast not found.")
-        return db_podcast
+    def get_all_podcasts(self, offset: int, limit: int) -> list[Podcast]:
 
-    @staticmethod
-    def update_podcast(session: Session, podcast_id: int, podcast_update: PodcastUpdate) -> Podcast:
-        podcast_db = PodcastService.get_podcast(session, podcast_id)
-        podcast_db.sqlmodel_update(
-            podcast_update.model_dump(exclude_unset=True))
-        session.add(podcast_db)
-        session.commit()
-        return podcast_db
+        return self.session.exec(select(Podcast)).all()
 
-    @staticmethod
-    def delete_podcast(session: Session, podcast_id: int) -> Message:
-        podcast_db = PodcastService.get_podcast(session, podcast_id)
-        UserService.delete_user_avatar(podcast_db)
-        for episode in podcast_db.episodes:
-            EpisodeService.delete_episode(session, episode.id)
-        session.delete(podcast_db)
-        session.commit()
+    def get_podcast_by_id(self, id: int) -> Podcast:
+
+        podcast = self.session.get(Podcast, id)
+        if not podcast:
+            raise PodcastNotFoundException()
+
+        return podcast
+
+    def update_podcast_by_id(self, id: int, podcast_update: PodcastUpdate) -> Podcast:
+
+        podcast = self.get_podcast_by_id(id)
+        if self.user_login.id != podcast.author_id and self.user_login.role != UserRole.ADMIN.value:
+            raise NoPermissionException()
+
+        podcast.sqlmodel_update(podcast_update.model_dump(exclude_unset=True))
+        self.session.add(podcast)
+        self.session.commit()
+
+        return podcast
+
+    def delete_podcast_by_id(self, id: int) -> Message:
+
+        podcast = self.get_podcast_by_id(id)
+        if self.user_login.id != podcast.author_id and self.user_login.role != UserRole.ADMIN.value:
+            raise NoPermissionException()
+
+        self._delete_existing_cover(podcast)
+
+        for episode in podcast.episodes:
+            self._delete_episode(episode)
+
+        self.session.delete(podcast)
+        self.session.commit()
+
         return Message("Podcast deleted.")
 
-    @staticmethod
-    def get_podcast_cover(session: Session, podcast_id: int) -> FileResponse:
-        podcast_db = PodcastService.get_podcast(session, podcast_id)
-        if not podcast_db.itunes_image_path:
-            raise HTTPException(404, "Cover not found.")
-        return FileResponse(podcast_db.itunes_image_path)
+    def get_cover_by_id(self, id: int) -> FileResponse:
 
-    @staticmethod
-    async def update_podcast_cover(session: Session, podcast_id: int, avatar_update: UploadFile) -> Message:
-        podcast_db = PodcastService.get_podcast(session, podcast_id)
-        try:
-            PodcastService.delete_podcast(podcast_db)
-            podcast_db.itunes_image_path = await save_file_to_contents(avatar_update, ContentFileType.PODCAST_COVER)
-        except Exception:
-            raise HTTPException(500, "Cover change failed.")
+        podcast = self.get_podcast_by_id(id)
 
-        session.add(podcast_db)
-        session.commit()
+        if not podcast.itunes_image_path:
+            raise CoverNotFoundException()
+
+        return FileResponse(podcast.itunes_image_path)
+
+    async def update_cover_by_id(self, id: int, avatar_update: UploadFile) -> Message:
+
+        podcast = self.get_podcast_by_id(id)
+        if self.user_login.id != podcast.author_id and self.user_login.role != UserRole.ADMIN.value:
+            raise NoPermissionException()
+
+        self._delete_existing_cover(podcast)
+        podcast.itunes_image_path = await save_file_to_contents(avatar_update, ContentFileType.PODCAST_COVER)
+
+        self.session.add(podcast)
+        self.session.commit()
 
         return Message(detail="Cover changed.")
 
-    @staticmethod
-    async def delete_podcast_cover(podcast: Podcast):
+    def _get_user_by_id(self, user_id):
+
+        user = self.session.get(User, user_id)
+        if not user:
+            raise UserNotFoundException()
+
+        return user
+
+    def _delete_existing_cover(self, podcast: Podcast) -> None:
+
         if podcast.itunes_image_path:
             delete_file_from_contents(podcast.itunes_image_path)
+
+    def _delete_episode(self, episode: Episode) -> None:
+
+        if episode.itunes_image_path:
+            delete_file_from_contents(episode.itunes_image_path)
+        if episode.enclosure_path:
+            delete_file_from_contents(episode.enclosure_path)
+
+        self.session.delete(episode)

@@ -6,14 +6,15 @@ from sqlmodel import Session, select
 
 from src.models.episode import Episode
 from src.models.podcast import Podcast
-from src.common.constants import ContentFileType
+from src.common.constants import ContentFileType, UserRole
 from src.common.util import Message, save_file_to_contents, delete_file_from_contents
 from src.common.auth import hash_password
 from src.common.exceptions import (
     UserAlreadyExistsException,
     NameAlreadyExistsException,
     UserNotFoundException,
-    AvatarNotFoundException
+    AvatarNotFoundException,
+    NoPermissionException
 )
 from src.models.user import (
     User,
@@ -24,8 +25,9 @@ from src.models.user import (
 
 class UserService:
 
-    def __init__(self, session: Session):
+    def __init__(self, session: Session, user_login: User):
         self.session = session
+        self.user_login = user_login
 
     def create_user(self, user: UserCreate) -> User:
 
@@ -71,6 +73,9 @@ class UserService:
 
     def update_user_by_id(self, user_id: int, user_update: UserUpdate) -> User:
 
+        if self.user_login.id != user_id and self.user_login.role != UserRole.ADMIN.value:
+            raise NoPermissionException()
+
         user = self.get_user_by_id(user_id)
 
         same_name_user = self.session.exec(
@@ -95,6 +100,9 @@ class UserService:
 
     def delete_user_by_id(self, user_id: int) -> Message:
 
+        if self.user_login.id != user_id and self.user_login.role != UserRole.ADMIN.value:
+            raise NoPermissionException()
+
         user = self.get_user_by_id(user_id)
         self._delete_existing_avatar(user)
 
@@ -115,6 +123,9 @@ class UserService:
         return FileResponse(user.avatar_path)
 
     async def update_avatar_by_id(self, user_id: int, avatar_update: UploadFile) -> Message:
+
+        if self.user_login.id != user_id and self.user_login.role != UserRole.ADMIN.value:
+            raise NoPermissionException()
 
         user = self.get_user_by_id(user_id)
 

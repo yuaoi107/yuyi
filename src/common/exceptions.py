@@ -29,3 +29,21 @@ class AvatarNotFoundException(AppException):
 
     def __init__(self, message: str = "头像不存在"):
         super().__init__(message, 404)
+
+
+class NoPermissionException(AppException):
+
+    def __init__(self, message: str = "当前用户没有权限"):
+        super().__init__(message, 403)
+
+
+class PodcastNotFoundException(AppException):
+
+    def __init__(self, message: str = "播客不存在"):
+        super().__init__(message, 404)
+
+
+class CoverNotFoundException(AppException):
+
+    def __init__(self, message: str = "封面不存在"):
+        super().__init__(message, 404)
