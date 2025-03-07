@@ -3,10 +3,10 @@ from typing import Annotated
 from fastapi import APIRouter, HTTPException, Query, UploadFile, status
 from fastapi.responses import FileResponse
 
-from ..common.constants import UserRole
+from ..core.constants import UserRole
 from ..database.database import SessionDep
-from ..common.util import add_responses, Message
-from ..common.auth import UserDep
+from ..core.util import add_responses, Message
+from ..core.auth import UserDep
 from ..models.user import (
     UserCreate,
     UserPublic,

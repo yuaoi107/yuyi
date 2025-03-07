@@ -4,7 +4,7 @@ from sqlmodel import Relationship, SQLModel, Field
 from pydantic import EmailStr
 from datetime import date
 
-from ..common.constants import UserRole
+from ..core.constants import UserRole
 
 if TYPE_CHECKING:
     from .podcast import Podcast, PodcastPublic

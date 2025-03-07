@@ -1,19 +1,9 @@
 import os
 import uuid
-
 from fastapi import UploadFile
 
-
-from ..config.settings import settings
-from .constants import Message, ContentFileType
-
-
-def add_responses(*status_codes: int) -> dict[int, dict[str, Message]]:
-    message = {"model": Message}
-    responses = {500: message}
-    for code in status_codes:
-        responses[code] = message
-    return responses
+from src.config import settings
+from src.core.constants import ContentFileType
 
 
 async def save_file_to_contents(file: UploadFile, content_filetype: ContentFileType) -> str:

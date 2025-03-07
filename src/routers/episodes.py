@@ -7,11 +7,11 @@ from sqlmodel import select
 
 from src.services.crud.episodes_service import EpisodeService
 
-from ..common.constants import UserRole
-from ..common.auth import UserDep
+from ..core.constants import UserRole
+from ..core.auth import UserDep
 from ..services.crud.podcast_service import PodcastService
 from ..database.database import SessionDep
-from ..common.util import add_responses, Message
+from ..core.util import add_responses, Message
 from ..models.episode import (
     Episode,
     EpisodeCreate,
