@@ -20,7 +20,7 @@ from src.core.exceptions import (
 
 class PodcastService:
 
-    def __init__(self, session: Session, user_login: User):
+    def __init__(self, session: Session, user_login: User | None = None):
         self.session = session
         self.user_login = user_login
 
