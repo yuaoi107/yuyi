@@ -80,7 +80,7 @@ class UserService:
         user = self.get_user_by_id(user_id)
 
         same_name_user = self.session.exec(
-            select(User).where(User.nickname == user.nickname)
+            select(User).where(User.nickname == user_update.nickname)
         ).first()
         if same_name_user:
             raise NameAlreadyExistsException()

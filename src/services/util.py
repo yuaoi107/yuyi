@@ -2,7 +2,7 @@ import os
 import uuid
 from fastapi import UploadFile
 
-from src.config import settings
+from src.config.settings import settings
 from src.core.constants import ContentFileType
 
 

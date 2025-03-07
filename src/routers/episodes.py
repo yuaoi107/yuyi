@@ -8,7 +8,8 @@ from src.core.auth import UserDep
 from src.database.database import SessionDep
 from src.models.episode import (
     EpisodeCreate,
-    EpisodePublic
+    EpisodePublic,
+    EpisodeUpdate
 )
 from src.services.episodes_service import EpisodeService
 
@@ -36,7 +37,7 @@ async def get_episode_by_path(session: SessionDep, id: int):
 
 
 @router.put("/episodes/{id}", status_code=status.HTTP_200_OK, response_model=EpisodePublic, summary="修改指定单集")
-async def put_episode_by_path(user_login: UserDep, session: SessionDep, id: int, episode_update: EpisodeCreate):
+async def put_episode_by_path(user_login: UserDep, session: SessionDep, id: int, episode_update: EpisodeUpdate):
     episode_service = EpisodeService(session, user_login)
     return episode_service.update_episode_by_id(id, episode_update)
 
@@ -72,9 +73,9 @@ async def put_episode_cover(user_login: UserDep, session: SessionDep, id: int, a
 
 
 @router.get("/podcasts/{podcast_id}/episodes", status_code=status.HTTP_200_OK, response_model=list[EpisodePublic], summary="获取指定播客单集列表")
-async def get_podcast_episodes(session: SessionDep, podcast_id: int):
+async def get_podcast_episodes(session: SessionDep, podcast_id: int, offset: Annotated[int, Query()] = 0, limit: Annotated[int, Query] = 10):
     episode_service = EpisodeService(session)
-    return episode_service.get_episodes_by_podcast_id(podcast_id)
+    return episode_service.get_episodes_by_podcast_id(podcast_id, offset, limit)
 
 
 @router.post("/podcasts/{podcast_id}/episodes", status_code=status.HTTP_201_CREATED, response_model=EpisodePublic, summary="为指定播客创建单集")

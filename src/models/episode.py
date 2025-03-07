@@ -41,8 +41,11 @@ class EpisodeCreate(EpisodeBase):
 
 class EpisodePublic(EpisodeBase):
     id: int
-    pub_date: datetime
+    pub_date: str
 
 
 class EpisodeUpdate(EpisodeBase):
-    pass
+    title: str | None = None
+    description: str | None = None
+    itunes_episode: int | None = None
+    itunes_season: int | None = None

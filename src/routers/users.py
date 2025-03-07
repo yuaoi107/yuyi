@@ -1,9 +1,8 @@
 from typing import Annotated
 
-from fastapi import APIRouter, HTTPException, Query, UploadFile, status
+from fastapi import APIRouter, Query, UploadFile, status
 from fastapi.responses import FileResponse
 
-from src.core.constants import UserRole
 from src.database.database import SessionDep
 from src.core.constants import Message
 from src.core.auth import UserDep
@@ -64,7 +63,7 @@ async def get_user_me_avatar(user_login: UserDep, session: SessionDep):
 @router.get("/{id}", status_code=status.HTTP_200_OK, response_model=UserPublic, summary="获取指定用户")
 async def get_user_by_path(session: SessionDep, id: int):
     user_service = UserService(session)
-    return user_service.get_avatar_by_id(id)
+    return user_service.get_user_by_id(id)
 
 
 @router.put("/{id}", status_code=status.HTTP_200_OK, response_model=UserPublic, summary="修改指定用户")
@@ -88,4 +87,4 @@ async def get_user_avatar_by_path(session: SessionDep, id: int):
 @router.put("/{id}/avatar", status_code=status.HTTP_200_OK, response_model=Message, summary="修改指定用户头像")
 async def put_user_avatar_by_path(user_login: UserDep, session: SessionDep, id: int, avatar_update: UploadFile):
     user_service = UserService(session, user_login)
-    return user_service.update_avatar_by_id(id)
+    return await user_service.update_avatar_by_id(id, avatar_update)

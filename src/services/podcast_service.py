@@ -75,6 +75,12 @@ class PodcastService:
         if self.user_login.id != podcast.author_id and self.user_login.role != UserRole.ADMIN.value:
             raise NoPermissionException()
 
+        same_name_podcast = self.session.exec(
+            select(Podcast).where(Podcast.title == podcast_update.title)
+        ).first()
+        if same_name_podcast:
+            raise NameAlreadyExistsException()
+
         podcast.sqlmodel_update(podcast_update.model_dump(exclude_unset=True))
         self.session.add(podcast)
         self.session.commit()
@@ -95,7 +101,7 @@ class PodcastService:
         self.session.delete(podcast)
         self.session.commit()
 
-        return Message("Podcast deleted.")
+        return Message(detail="Podcast deleted.")
 
     def get_cover_by_id(self, id: int) -> FileResponse:
 

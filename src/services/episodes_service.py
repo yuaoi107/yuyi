@@ -6,7 +6,7 @@ from fastapi import UploadFile
 from fastapi.responses import FileResponse
 from sqlmodel import Session, select
 
-from src.core.constants import UserRole
+from src.core.constants import ContentFileType, UserRole
 from src.core.constants import Message
 from src.services.util import save_file_to_contents, delete_file_from_contents
 from src.models.episode import (
@@ -45,6 +45,10 @@ class EpisodeService:
 
     def get_episodes_by_podcast_id(self, podcast_id: int, offset: int, limit: int) -> list[Episode]:
 
+        podcast = self.session.get(Podcast, podcast_id)
+        if not podcast:
+            raise PodcastNotFoundException()
+
         return self.session.exec(
             select(Episode).where(Episode.podcast_id == podcast_id)
         ).all()
@@ -65,13 +69,13 @@ class EpisodeService:
 
         extra_data = {
             "podcast_id": podcast_id,
-            "guid": uuid4(),
+            "guid": uuid4().hex,
             "pub_date": formatdate(time())
         }
 
         new_episode = Episode.model_validate(episode_upload, update=extra_data)
         self.session.add(new_episode)
-        self.session.commit(new_episode)
+        self.session.commit()
         self.session.refresh(new_episode)
 
         return new_episode
@@ -124,7 +128,7 @@ class EpisodeService:
             raise NoPermissionException()
 
         self._delete_existing_cover(episode)
-        episode.itunes_image_path = await save_file_to_contents(cover_update)
+        episode.itunes_image_path = await save_file_to_contents(cover_update, ContentFileType.EPISODE_COVER)
 
         self.session.add(episode)
         self.session.commit()
@@ -147,7 +151,7 @@ class EpisodeService:
             raise NoPermissionException()
 
         self._delete_existing_audio(episode)
-        episode.enclosure_path = await save_file_to_contents(audio_update)
+        episode.enclosure_path = await save_file_to_contents(audio_update, ContentFileType.AUDIO)
 
         self.session.add(episode)
         self.session.commit()

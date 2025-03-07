@@ -27,7 +27,7 @@ async def post_user_me_podcast(user_login: UserDep, session: SessionDep, podcast
 @router.get("/users/me/podcasts", status_code=status.HTTP_201_CREATED, response_model=list[PodcastPublic], summary="获取当前用户播客列表")
 async def get_user_me_podcasts(user_login: UserDep, session: SessionDep, offset: Annotated[int, Query()] = 0, limit: Annotated[int, Query()] = 10):
     podcast_service = PodcastService(session, user_login)
-    return podcast_service.get_podcasts_by_author_id(user_login.id)
+    return podcast_service.get_podcasts_by_author_id(user_login.id, offset, limit)
 
 
 @router.post("/users/{user_id}/podcasts", status_code=status.HTTP_201_CREATED, response_model=PodcastPublic, summary="为用户创建播客")
@@ -39,7 +39,7 @@ async def post_user_podcast(user_login: UserDep, session: SessionDep, user_id: i
 @router.get("/users/{user_id}/podcasts", status_code=status.HTTP_200_OK, response_model=list[PodcastPublic], summary="获取用户播客列表")
 async def get_user_podcasts(session: SessionDep, user_id: int, offset: Annotated[int | None, Query()] = 0, limit: Annotated[int | None, Query()] = 10):
     podcast_service = PodcastService(session)
-    return podcast_service.get_podcasts_by_author_id(user_id)
+    return podcast_service.get_podcasts_by_author_id(user_id, offset, limit)
 
 
 @router.post("/podcasts", status_code=status.HTTP_201_CREATED, response_model=PodcastPublic, summary="创建播客")
