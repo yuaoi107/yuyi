@@ -47,3 +47,15 @@ class CoverNotFoundException(AppException):
 
     def __init__(self, message: str = "封面不存在"):
         super().__init__(message, 404)
+
+
+class AudioNotFoundException(AppException):
+
+    def __init__(self, message: str = "音频不存在"):
+        super().__init__(message, 404)
+
+
+class EpisodeNotFoundException(AppException):
+
+    def __init__(self, message: str = "单集不存在"):
+        super().__init__(message, 404)

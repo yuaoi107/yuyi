@@ -2,45 +2,65 @@ from time import time
 from email.utils import formatdate
 from uuid import uuid4
 
-from fastapi import HTTPException, UploadFile
+from fastapi import UploadFile
 from fastapi.responses import FileResponse
 from sqlmodel import Session, select
 
-from .podcast_service import PodcastService
-from ..common.util import Message, delete_file_from_contents, save_file_to_contents
-from ..models.episode import (
+from src.common.constants import UserRole
+from src.common.util import Message, delete_file_from_contents, save_file_to_contents
+from src.models.episode import (
     Episode,
     EpisodeCreate,
     EpisodeUpdate
 )
+from src.common.exceptions import (
+    AudioNotFoundException,
+    EpisodeNotFoundException,
+    NoPermissionException,
+    PodcastNotFoundException,
+    NameAlreadyExistsException,
+    CoverNotFoundException
+)
+from src.models.podcast import Podcast
+from src.models.user import User
 
 
 class EpisodeService:
 
-    @staticmethod
-    def get_episode(session: Session, episode_id: int) -> Episode:
-        episode_db = session.get(Episode, episode_id)
-        if not episode_db:
-            raise HTTPException(404, "Episode not found.")
-        return episode_db
+    def __init__(self, session: Session, user_login: User):
+        self.session = session
+        self.user_login = user_login
 
-    @staticmethod
-    def get_episodes(session: Session, offset: int, limit: int) -> list[Episode]:
-        return session.exec(select(Episode)).all()
+    def get_episode_by_id(self, id: int) -> Episode:
 
-    @staticmethod
-    def get_podcast_episodes(session: Session, podcast_id: int, offset: int, limit: int) -> list[Episode]:
-        return session.exec(select(Episode).where(Episode.podcast_id == podcast_id)).all()
+        episode = self.session.get(Episode, id)
+        if not episode:
+            raise EpisodeNotFoundException()
+        return episode
 
-    @staticmethod
-    def create_episode(session: Session, podcast_id: int, episode_upload: EpisodeCreate) -> Episode:
-        podcast_db = PodcastService.get_podcast(session, podcast_db)
+    def get_all_episodes(self, offset: int, limit: int) -> list[Episode]:
 
-        episode_existed = session.exec(select(Episode).where(
+        return self.session.exec(select(Episode)).all()
+
+    def get_episodes_by_podcast_id(self, podcast_id: int, offset: int, limit: int) -> list[Episode]:
+
+        return self.session.exec(
+            select(Episode).where(Episode.podcast_id == podcast_id)
+        ).all()
+
+    def create_episode_by_podcast_id(self, podcast_id: int, episode_upload: EpisodeCreate) -> Episode:
+
+        podcast = self.session.get(Podcast, podcast_id)
+        if not podcast:
+            raise PodcastNotFoundException()
+        if self.user_login.id != podcast.author_id and self.user_login.role != UserRole.ADMIN.value:
+            raise NoPermissionException()
+
+        same_title_episode = self.session.exec(select(Episode).where(
             Episode.podcast_id == podcast_id, Episode.title == episode_upload.title)).first()
 
-        if episode_existed:
-            raise HTTPException(409, "Title taken.")
+        if same_title_episode:
+            raise NameAlreadyExistsException()
 
         extra_data = {
             "podcast_id": podcast_id,
@@ -49,79 +69,96 @@ class EpisodeService:
         }
 
         new_episode = Episode.model_validate(episode_upload, update=extra_data)
-        session.add(new_episode)
-        session.commit(new_episode)
-        session.refresh(new_episode)
+        self.session.add(new_episode)
+        self.session.commit(new_episode)
+        self.session.refresh(new_episode)
+
         return new_episode
 
-    @staticmethod
-    def update_episode(session: Session, episode_id: int, episode_upload: EpisodeUpdate) -> Episode:
+    def update_episode_by_id(self, id: int, episode_upload: EpisodeUpdate) -> Episode:
 
-        episode_db = EpisodeService.get_episode(
-            session, episode_id)
+        episode = self.get_episode_by_id(id)
+        podcast = self.session.get(Podcast, episode.podcast_id)
+        if self.user_login.id != podcast.author_id and self.user_login.role != UserRole.ADMIN.value:
+            raise NoPermissionException()
 
-        episode_db.sqlmodel_update(
-            episode_upload.model_dump(exclude_unset=True))
-        session.add(episode_db)
-        session.commit()
-        session.refresh(episode_db)
-        return episode_db
+        episode.sqlmodel_update(
+            episode_upload.model_dump(exclude_unset=True)
+        )
+        self.session.add(episode)
+        self.session.commit()
+        self.session.refresh(episode)
+        return episode
 
-    @staticmethod
-    def delete_episode(session: Session, episode_id: int) -> Message:
-        episode_db = EpisodeService.get_episode(session, episode_id)
-        EpisodeService.delete_episode_cover(episode_db)
-        EpisodeService.delete_episode_audio(episode_db)
-        session.delete(episode_db)
-        session.commit()
+    def delete_episode_by_id(self, id: int) -> Message:
+
+        episode = self.get_episode_by_id(id)
+        podcast = self.session.get(Podcast, episode.podcast_id)
+        if self.user_login.id != podcast.author_id and self.user_login.role != UserRole.ADMIN.value:
+            raise NoPermissionException()
+
+        self._delete_existing_cover(episode)
+        if episode.enclosure_path:
+            delete_file_from_contents(episode.enclosure_path)
+
+        self.session.delete(episode)
+        self.session.commit()
+
         return Message(detail="Episode deleted.")
 
-    @staticmethod
-    def get_episode_cover(session: Session, episode_id: int) -> FileResponse:
-        episode_db = EpisodeService.get_episode(session, episode_id)
-        if not episode_db.itunes_image_path:
-            raise HTTPException(404, "Cover not found.")
-        return FileResponse(episode_db.itunes_image_path)
+    def get_cover_by_id(self, id: int) -> FileResponse:
 
-    @staticmethod
-    async def update_episode_cover(session: Session, episode_id: int, cover_update: UploadFile) -> Message:
-        episode_db = EpisodeService.get_episode(session, episode_id)
-        try:
-            EpisodeService.delete_episode_cover(episode_db)
-            episode_db.itunes_image_path = await save_file_to_contents(cover_update)
-        except:
-            raise HTTPException(500, "Cover change failed.")
+        episode = self.get_episode_by_id(id)
 
-        session.add(episode_db)
-        session.commit()
+        if not episode.itunes_image_path:
+            raise CoverNotFoundException()
+
+        return FileResponse(episode.itunes_image_path)
+
+    async def update_cover_by_id(self, id: int, cover_update: UploadFile) -> Message:
+
+        episode = self.get_episode_by_id(id)
+        podcast = self.session.get(Podcast, episode.podcast_id)
+        if self.user_login.id != podcast.author_id and self.user_login.role != UserRole.ADMIN.value:
+            raise NoPermissionException()
+
+        self._delete_existing_cover(episode)
+        episode.itunes_image_path = await save_file_to_contents(cover_update)
+
+        self.session.add(episode)
+        self.session.commit()
+
         return Message(detail="Cover changed.")
 
-    @staticmethod
-    def get_episode_audio(session: Session, episode_id: int) -> FileResponse:
-        episode_db = EpisodeService.get_episode(session, episode_id)
-        if not episode_db.enclosure_path:
-            raise HTTPException(404, "Audio not found.")
-        return FileResponse(episode_db.itunes_image_path)
+    def get_audio_by_id(self, id: int) -> FileResponse:
 
-    @staticmethod
-    async def update_episode_audio(session: Session, episode_id: int, audio_update: UploadFile) -> Message:
-        episode_db = EpisodeService.get_episode(session, episode_id)
-        try:
-            EpisodeService.delete_episode_audio(episode_db)
-            episode_db.enclosure_path = await save_file_to_contents(audio_update)
-        except:
-            raise HTTPException(500, "Audio change failed.")
+        episode = self.get_episode_by_id(id)
 
-        session.add(episode_db)
-        session.commit()
+        if not episode.enclosure_path:
+            raise AudioNotFoundException()
+        return FileResponse(episode.itunes_image_path)
+
+    async def update_audio_by_id(self, id: int, audio_update: UploadFile) -> Message:
+
+        episode = self.get_episode_by_id(id)
+        podcast = self.session.get(Podcast, episode.podcast_id)
+        if self.user_login.id != podcast.author_id and self.user_login.role != UserRole.ADMIN.value:
+            raise NoPermissionException()
+
+        self._delete_existing_audio(episode)
+        episode.enclosure_path = await save_file_to_contents(audio_update)
+
+        self.session.add(episode)
+        self.session.commit()
+
         return Message(detail="Audio changed.")
 
-    @staticmethod
-    def delete_episode_cover(episode: Episode):
+    def _delete_existing_cover(self, episode: Episode):
+
         if episode.itunes_image_path:
             delete_file_from_contents(episode.itunes_image_path)
 
-    @staticmethod
-    def delete_episode_audio(episode: Episode):
+    def _delete_existing_audio(self, episode: Episode):
+
         if episode.enclosure_path:
             delete_file_from_contents(episode.enclosure_path)
