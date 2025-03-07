@@ -1,10 +1,9 @@
 from typing import Annotated
 
-from fastapi import APIRouter, HTTPException, Path, Query, UploadFile, status
+from fastapi import APIRouter, HTTPException, Query, UploadFile, status
 from fastapi.responses import FileResponse
 
-from src.common.constants import UserRole
-
+from ..common.constants import UserRole
 from ..database.database import SessionDep
 from ..common.util import add_responses, Message
 from ..common.auth import UserDep
@@ -94,7 +93,7 @@ async def put_user_me_avatar(user_login: UserDep, session: SessionDep, avatar_up
     status_code=status.HTTP_200_OK,
     response_class=FileResponse,
     summary="获取当前用户头像",
-    responses=add_responses(401)
+    responses=add_responses(401, 404)
 )
 async def get_user_me_avatar(user_login: UserDep, session: SessionDep):
     return UserService.get_user_avatar(session, user_login.id)

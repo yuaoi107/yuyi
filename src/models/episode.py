@@ -1,5 +1,9 @@
-from sqlmodel import SQLModel, Field
+from typing import Optional, TYPE_CHECKING
+from sqlmodel import Relationship, SQLModel, Field
 from datetime import datetime
+
+if TYPE_CHECKING:
+    from .podcast import Podcast
 
 
 class EpisodeBase(SQLModel):
@@ -14,7 +18,7 @@ class Episode(EpisodeBase, table=True):
     id: int | None = Field(default=None, primary_key=True)
 
     podcast_id: int | None = Field(default=None, foreign_key="podcast.id")
-
+    podcast: Optional["Podcast"] = Relationship(back_populates="episodes")
     guid: str
 
     enclosure_path: str | None = None

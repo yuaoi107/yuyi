@@ -51,8 +51,8 @@ State   | Method      | Endpoint
 ✅      | **PUT**     | `/episodes/{episode_id}/cover`
 ✅      | GET         | `/episodes/{episode_id}/audio`
 ✅      | **PUT**     | `/episodes/{episode_id}/audio`
-❌      | **POST**    | `/podcasts/{podcast_id}/episodes`
-❌      | GET         | `/podcasts/{podcast_id}/episodes?offset&limit`
+✅      | **POST**    | `/podcasts/{podcast_id}/episodes`
+✅      | GET         | `/podcasts/{podcast_id}/episodes?offset&limit`
 
 ## Working Trace
 

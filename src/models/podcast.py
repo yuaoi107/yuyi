@@ -5,6 +5,7 @@ from datetime import date
 
 if TYPE_CHECKING:
     from .user import User, UserPublic
+    from .episode import Episode
 
 
 class PodcastBase(SQLModel):
@@ -35,6 +36,7 @@ class Podcast(PodcastBase, table=True):
     is_published: bool = False
 
     author: Optional["User"] = Relationship(back_populates="podcasts")
+    episodes: list["Episode"] = Relationship(back_populates="podcast")
 
 
 class PodcastUpload(PodcastBase):

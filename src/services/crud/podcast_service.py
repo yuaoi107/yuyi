@@ -1,13 +1,11 @@
-
-
 from datetime import date
 from fastapi import HTTPException, UploadFile, status
 from fastapi.responses import FileResponse
 from sqlmodel import Session, select
 
+from ...services.crud.episodes_service import EpisodeService
 from ...common.util import delete_file_from_contents, save_file_to_contents
-from ...models.podcast import Podcast, PodcastPublic, PodcastUpdate, PodcastUpload
-from ...models.user import User
+from ...models.podcast import Podcast, PodcastUpdate, PodcastUpload
 from ...services.crud.user_service import UserService
 from ...config.settings import settings
 from ...common.constants import Message, ContentFileType
@@ -15,7 +13,7 @@ from ...common.constants import Message, ContentFileType
 
 class PodcastService:
     @staticmethod
-    def create_podcast(session: Session, author_id: int, podcast_upload: PodcastUpload) -> PodcastPublic:
+    def create_podcast(session: Session, author_id: int, podcast_upload: PodcastUpload) -> Podcast:
         user_db = UserService.get_user(session, author_id)
 
         if session.exec(select(Podcast).where(Podcast.title == podcast_upload.title)).first():
@@ -23,10 +21,7 @@ class PodcastService:
 
         extra_data = {
             "author_id": user_db.id,
-            "feed_path": "fake",
-            "link": "fake",
             "itunes_author": user_db.nickname,
-            "itunes_image_path": "fake",
             "createtime": date.today().isoformat(),
             "generator": settings.GENERATOR_TITLE
         }
@@ -39,11 +34,11 @@ class PodcastService:
         return new_podcast
 
     @staticmethod
-    def get_user_podcasts(session: Session, author_id: int, offset: int, limit: int) -> list[PodcastPublic]:
+    def get_user_podcasts(session: Session, author_id: int, offset: int, limit: int) -> list[Podcast]:
         return session.exec(select(Podcast).where(Podcast.author_id == author_id)).all()
 
     @staticmethod
-    def get_podcasts(session: Session, offset: int, limit: int) -> list[PodcastPublic]:
+    def get_podcasts(session: Session, offset: int, limit: int) -> list[Podcast]:
         return session.exec(select(Podcast)).all()
 
     @staticmethod
@@ -54,7 +49,7 @@ class PodcastService:
         return db_podcast
 
     @staticmethod
-    def update_podcast(session: Session, podcast_id: int, podcast_update: PodcastUpdate) -> PodcastPublic:
+    def update_podcast(session: Session, podcast_id: int, podcast_update: PodcastUpdate) -> Podcast:
         podcast_db = PodcastService.get_podcast(session, podcast_id)
         podcast_db.sqlmodel_update(
             podcast_update.model_dump(exclude_unset=True))
@@ -65,6 +60,9 @@ class PodcastService:
     @staticmethod
     def delete_podcast(session: Session, podcast_id: int) -> Message:
         podcast_db = PodcastService.get_podcast(session, podcast_id)
+        UserService.delete_user_avatar(podcast_db)
+        for episode in podcast_db.episodes:
+            EpisodeService.delete_episode(session, episode.id)
         session.delete(podcast_db)
         session.commit()
         return Message("Podcast deleted.")
@@ -80,8 +78,7 @@ class PodcastService:
     async def update_podcast_cover(session: Session, podcast_id: int, avatar_update: UploadFile) -> Message:
         podcast_db = PodcastService.get_podcast(session, podcast_id)
         try:
-            if podcast_db.itunes_image_path:
-                delete_file_from_contents(podcast_db.itunes_image_path)
+            PodcastService.delete_podcast(podcast_db)
             podcast_db.itunes_image_path = await save_file_to_contents(avatar_update, ContentFileType.PODCAST_COVER)
         except Exception:
             raise HTTPException(500, "Cover change failed.")
@@ -90,3 +87,8 @@ class PodcastService:
         session.commit()
 
         return Message(detail="Cover changed.")
+
+    @staticmethod
+    async def delete_podcast_cover(podcast: Podcast):
+        if podcast.itunes_image_path:
+            delete_file_from_contents(podcast.itunes_image_path)

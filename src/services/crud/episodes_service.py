@@ -1,21 +1,16 @@
 from time import time
 from email.utils import formatdate
-from typing import Annotated
 from uuid import uuid4
 
-from fastapi import APIRouter, HTTPException, Query, UploadFile, status
+from fastapi import HTTPException, UploadFile
 from fastapi.responses import FileResponse
 from sqlmodel import Session, select
 
-from ...common.constants import UserRole
-from ...common.auth import UserDep
-from ...services.crud.podcast_service import PodcastService
-from ...database.database import SessionDep
-from ...common.util import add_responses, Message, delete_file_from_contents, save_file_to_contents
+from .podcast_service import PodcastService
+from ...common.util import Message, delete_file_from_contents, save_file_to_contents
 from ...models.episode import (
     Episode,
     EpisodeUpload,
-    EpisodePublic,
     EpisodeUpdate
 )
 
@@ -60,7 +55,7 @@ class EpisodeService:
         return new_episode
 
     @staticmethod
-    def update_episode(session: Session, episode_id: int, episode_upload: EpisodeUpload) -> Episode:
+    def update_episode(session: Session, episode_id: int, episode_upload: EpisodeUpdate) -> Episode:
 
         episode_db = EpisodeService.get_episode(
             session, episode_id)
@@ -75,6 +70,8 @@ class EpisodeService:
     @staticmethod
     def delete_episode(session: Session, episode_id: int) -> Message:
         episode_db = EpisodeService.get_episode(session, episode_id)
+        EpisodeService.delete_episode_cover(episode_db)
+        EpisodeService.delete_episode_audio(episode_db)
         session.delete(episode_db)
         session.commit()
         return Message(detail="Episode deleted.")
@@ -90,8 +87,7 @@ class EpisodeService:
     async def update_episode_cover(session: Session, episode_id: int, cover_update: UploadFile) -> Message:
         episode_db = EpisodeService.get_episode(session, episode_id)
         try:
-            if episode_db.itunes_image_path:
-                delete_file_from_contents(episode_db.itunes_image_path)
+            EpisodeService.delete_episode_cover(episode_db)
             episode_db.itunes_image_path = await save_file_to_contents(cover_update)
         except:
             raise HTTPException(500, "Cover change failed.")
@@ -111,8 +107,7 @@ class EpisodeService:
     async def update_episode_audio(session: Session, episode_id: int, audio_update: UploadFile) -> Message:
         episode_db = EpisodeService.get_episode(session, episode_id)
         try:
-            if episode_db.enclosure_path:
-                delete_file_from_contents(episode_db.enclosure_path)
+            EpisodeService.delete_episode_audio(episode_db)
             episode_db.enclosure_path = await save_file_to_contents(audio_update)
         except:
             raise HTTPException(500, "Audio change failed.")
@@ -120,3 +115,13 @@ class EpisodeService:
         session.add(episode_db)
         session.commit()
         return Message(detail="Audio changed.")
+
+    @staticmethod
+    def delete_episode_cover(episode: Episode):
+        if episode.itunes_image_path:
+            delete_file_from_contents(episode.itunes_image_path)
+
+    @staticmethod
+    def delete_episode_audio(episode: Episode):
+        if episode.enclosure_path:
+            delete_file_from_contents(episode.enclosure_path)

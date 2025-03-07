@@ -130,8 +130,8 @@ async def get_user_by_path(session: SessionDep, podcast_id: int):
     responses=add_responses(401, 403, 404, 409)
 )
 async def put_podcast_by_path(user_login: UserDep, session: SessionDep, podcast_id: int, podcast_update: PodcastUpdate):
-    podcast_db = PodcastService.get_podcast(session, podcast_id)
-    if user_login.role != UserRole.ADMIN.value and user_login.id != podcast_db.author_id:
+    podcast_to_update = PodcastService.get_podcast(session, podcast_id)
+    if user_login.role != UserRole.ADMIN.value and user_login.id != podcast_to_update.author_id:
         raise HTTPException(403)
     return PodcastService.update_podcast(session, podcast_id, podcast_update)
 
@@ -144,8 +144,8 @@ async def put_podcast_by_path(user_login: UserDep, session: SessionDep, podcast_
     responses=add_responses(401, 403, 404, 409)
 )
 async def delete_podcast_by_path(user_login: UserDep, session: SessionDep, podcast_id: int):
-    podcast_db = PodcastService.get_podcast(session, podcast_id)
-    if user_login.role != UserRole.ADMIN.value and user_login.id != podcast_db.author_id:
+    podcast_to_update = PodcastService.get_podcast(session, podcast_id)
+    if user_login.role != UserRole.ADMIN.value and user_login.id != podcast_to_update.author_id:
         raise HTTPException(403)
     return PodcastService.delete_podcast(session, podcast_id)
 
@@ -169,7 +169,7 @@ async def get_podcast_cover(session: SessionDep, podcast_id: int):
     responses=add_responses(401, 403, 404)
 )
 async def put_podcast_cover(user_login: UserDep, session: SessionDep, podcast_id: int, avatar_update: UploadFile):
-    podcast_db = PodcastService.get_podcast(session, podcast_id)
-    if user_login.role != UserRole.ADMIN.value and user_login.id != podcast_db.author_id:
+    podcast_to_update = PodcastService.get_podcast(session, podcast_id)
+    if user_login.role != UserRole.ADMIN.value and user_login.id != podcast_to_update.author_id:
         raise HTTPException(403)
     return await PodcastService.update_podcast_cover(session, podcast_id, avatar_update)
