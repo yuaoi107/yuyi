@@ -7,8 +7,8 @@ from fastapi.responses import FileResponse
 from sqlmodel import Session, select
 
 from .podcast_service import PodcastService
-from ...common.util import Message, delete_file_from_contents, save_file_to_contents
-from ...models.episode import (
+from ..common.util import Message, delete_file_from_contents, save_file_to_contents
+from ..models.episode import (
     Episode,
     EpisodeCreate,
     EpisodeUpdate
