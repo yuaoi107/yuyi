@@ -6,7 +6,6 @@ from sqlmodel import select
 
 from ..common.auth import UserDep
 from ..services.podcast_service import PodcastService
-from ..services.shared import get_target_user_id
 
 from ..database.database import SessionDep
 from ..common.util import add_responses, Message

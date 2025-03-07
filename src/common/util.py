@@ -1,9 +1,7 @@
 import os
 import uuid
-from enum import Enum
 
 from fastapi import UploadFile
-from pydantic import BaseModel
 
 
 from ..config.settings import settings

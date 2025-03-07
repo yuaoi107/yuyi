@@ -6,7 +6,7 @@ from fastapi.staticfiles import StaticFiles
 from .models import *
 from .database.database import create_db_and_tables
 from .config.settings import settings
-from .routers import users, avatars, podcasts, token
+from .routers import users, podcasts, token
 
 create_db_and_tables()
 
@@ -28,7 +28,6 @@ async def check_app_state(key: Annotated[str, Query()]):
 
 for router in [
     users.router,
-    avatars.router,
     podcasts.router,
     token.router
 ]:

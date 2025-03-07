@@ -9,17 +9,17 @@ Yuyi is the RESTful API backend for a generic podcast hosting platform.
 State   | Method      | Endpoint
 --------|-------------|-----
 ✅      | POST        | `/users`
-❌      | GET         | `/users?username&offset&limit`
-❌      | GET         | `/users/{user_id}`
-❌      | **PUT**     | `/users/{user_id}`
-❌      | **DELETE**  | `/users/{user_id}`
-❌      | GET         | `/users/{user_id}/avatar`
-❌      | **PUT**     | `/users/{user_id}/avatar`
-❌      | **GET**     | `/users/me`
-❌      | **PUT**     | `/users/me`
-❌      | **DELETE**  | `/users/me`
-❌      | **PUT**     | `/users/me/avatar`
-❌      | **GET**     | `/users/me/avatar`
+✅      | GET         | `/users?offset&limit`
+✅      | **GET**     | `/users/me`
+✅      | **PUT**     | `/users/me`
+✅      | **DELETE**  | `/users/me`
+✅      | **PUT**     | `/users/me/avatar`
+✅      | **GET**     | `/users/me/avatar`
+✅      | GET         | `/users/{user_id}`
+✅      | **PUT**     | `/users/{user_id}`
+✅      | **DELETE**  | `/users/{user_id}`
+✅      | GET         | `/users/{user_id}/avatar`
+✅      | **PUT**     | `/users/{user_id}/avatar`
 
 ### Podcast
 
