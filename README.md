@@ -25,21 +25,18 @@ State   | Method      | Endpoint
 
 State   | Method      | Endpoint
 --------|-------------|-----
-❌      | **POST**    | `/users/{user_id}/podcasts`
-❌      | GET         | `/users/{user_id}/podcasts?offset&limit`
-❌      | GET         | `/users/{user_id}/podcasts/{podcast_id}`
-❌      | **PUT**     | `/users/{user_id}/podcasts/{podcast_id}`
-❌      | **DELETE**  | `/users/{user_id}/podcasts/{podcast_id}`
-❌      | **POST**    | `/podcasts`
-❌      | **GET**     | `/podcasts?category&offset&limit`
-❌      | GET         | `/podcasts/{podcast_id}`
-❌      | **PUT**     | `/podcasts/{podcast_id}`
-❌      | **DELETE**  | `/podcasts/{podcast_id}`
-❌      | GET         | `/podcasts/{podcast_id}/cover`
-❌      | **PUT**     | `/podcasts/{podcast_id}/cover`
+✅      | **POST**    | `/users/{user_id}/podcasts`
+✅      | GET         | `/users/{user_id}/podcasts?offset&limit`
+✅      | **POST**    | `/podcasts`
+✅      | **GET**     | `/podcasts?offset&limit`
+✅      | GET         | `/podcasts/{podcast_id}`
+✅      | **PUT**     | `/podcasts/{podcast_id}`
+✅      | **DELETE**  | `/podcasts/{podcast_id}`
+✅      | GET         | `/podcasts/{podcast_id}/cover`
+✅      | **PUT**     | `/podcasts/{podcast_id}/cover`
 ❌      | GET         | `/podcasts/{podcast_id}/rss`
-❌      | **POST**    | `/users/me/podcasts`
-❌      | **GET**     | `/users/me/podcasts`
+✅      | **POST**    | `/users/me/podcasts`
+✅      | GET         | `/users/me/podcasts?offset&limit`
 
 ### Episode
 

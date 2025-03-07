@@ -8,7 +8,7 @@ class UserRole(Enum):
     USER = "user"
 
 
-class FileType(Enum):
+class ContentFileType(Enum):
     AVATAR = "avatars"
     PODCAST_COVER = "podcast_covers"
     EPISODE_COVER = "episode_covers"

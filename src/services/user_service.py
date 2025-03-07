@@ -4,7 +4,7 @@ from fastapi import HTTPException, UploadFile, status
 from fastapi.responses import FileResponse
 from sqlmodel import Session, select
 
-from src.common.constants import FileType
+from src.common.constants import ContentFileType
 
 from ..common.util import Message, save_file_to_contents, delete_file_from_contents
 from ..common.auth import hash_password
@@ -50,11 +50,8 @@ class UserService:
         return user_db
 
     @staticmethod
-    def update_user(session: Session, id: int, user_update: UserUpdate) -> User:
-        user_db = session.get(User, id)
-
-        if not user_db:
-            raise HTTPException(status.HTTP_404_NOT_FOUND, "User not found.")
+    def update_user(session: Session, user_id: int, user_update: UserUpdate) -> User:
+        user_db = UserService.get_user(session, user_id)
 
         if session.exec(select(User).where(User.nickname == user_update.nickname)).first():
             raise HTTPException(status.HTTP_409_CONFLICT, "Nickname taken.")
@@ -75,31 +72,25 @@ class UserService:
 
     @staticmethod
     def delete_user(session: Session, user_id: int) -> Message:
-        user_db = session.get(User, user_id)
-        if not user_db:
-            raise HTTPException(status.HTTP_404_NOT_FOUND, "User not found.")
+        user_db = UserService.get_user(session, user_id)
         session.delete(user_db)
         session.commit()
         return Message(detail="Successfully deleted")
 
     @staticmethod
     def get_user_avatar(session: Session, user_id: int) -> FileResponse:
-        user_db = session.get(User, user_id)
-        if not user_db:
-            raise HTTPException(status.HTTP_404_NOT_FOUND, "User not found.")
+        user_db = UserService.get_user(session, user_id)
         if not user_db.avatar_path:
             raise HTTPException(status.HTTP_404_NOT_FOUND, "Avatar not found.")
         return FileResponse(user_db.avatar_path)
 
     @staticmethod
     async def update_user_avatar(session: Session, user_id: int, avatar_update: UploadFile) -> Message:
-        user_db = session.get(User, user_id)
-        if not user_db:
-            raise HTTPException(status.HTTP_404_NOT_FOUND, "User not found.")
+        user_db = UserService.get_user(session, user_id)
         if user_db.avatar_path:
             delete_file_from_contents(user_db.avatar_path)
         user_db.avatar_path = await save_file_to_contents(
-            avatar_update, FileType.AVATAR)
+            avatar_update, ContentFileType.AVATAR)
 
         session.add(user_db)
         session.commit()

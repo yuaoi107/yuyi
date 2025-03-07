@@ -104,7 +104,7 @@ async def get_user_me_avatar(user_login: UserDep, session: SessionDep):
     "/{user_id}",
     status_code=status.HTTP_200_OK,
     response_model=UserPublic,
-    summary="获取用户",
+    summary="获取指定用户",
     responses=add_responses(404)
 )
 async def get_user_by_path(session: SessionDep, user_id: int):
@@ -115,7 +115,7 @@ async def get_user_by_path(session: SessionDep, user_id: int):
     "/{user_id}",
     status_code=status.HTTP_200_OK,
     response_model=UserPublic,
-    summary="修改用户",
+    summary="修改指定用户",
     responses=add_responses(401, 403, 404, 409)
 )
 async def put_user_by_path(user_login: UserDep, session: SessionDep, user_id: int, user_update: UserUpdate):
@@ -128,7 +128,7 @@ async def put_user_by_path(user_login: UserDep, session: SessionDep, user_id: in
     "/{user_id}",
     status_code=status.HTTP_200_OK,
     response_model=Message,
-    summary="删除用户",
+    summary="删除指定用户",
     responses=add_responses(401, 403, 404)
 )
 async def delete_user_by_path(user_login: UserDep, session: SessionDep, user_id: int):
@@ -141,7 +141,7 @@ async def delete_user_by_path(user_login: UserDep, session: SessionDep, user_id:
     "/{user_id}/avatar",
     status_code=status.HTTP_200_OK,
     response_class=FileResponse,
-    summary="获取用户头像",
+    summary="获取指定用户头像",
     responses=add_responses(404)
 )
 async def get_user_avatar_by_path(session: SessionDep, user_id: int):
@@ -152,7 +152,7 @@ async def get_user_avatar_by_path(session: SessionDep, user_id: int):
     "/{user_id}/avatar",
     status_code=status.HTTP_200_OK,
     response_model=Message,
-    summary="修改用户头像",
+    summary="修改指定用户头像",
     responses=add_responses(401, 403, 404)
 )
 async def put_user_avatar_by_path(user_login: UserDep, session: SessionDep, user_id: int, avatar_update: UploadFile):

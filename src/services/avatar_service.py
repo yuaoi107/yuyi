@@ -2,7 +2,7 @@ from fastapi import HTTPException, UploadFile, status
 from fastapi.responses import RedirectResponse
 from sqlmodel import Session
 
-from ..common.util import FileType, archive_file, delete_by_url, Message
+from ..common.util import ContentFileType, archive_file, delete_by_url, Message
 from ..models.user import User
 
 
@@ -16,7 +16,7 @@ class AvatarService:
         try:
             if db_user.avatar_path:
                 delete_by_url(db_user.avatar_path)
-            avatar_url = await archive_file(avatar, FileType.AVATAR)
+            avatar_url = await archive_file(avatar, ContentFileType.AVATAR)
         except Exception:
             raise HTTPException(
                 status.HTTP_500_INTERNAL_SERVER_ERROR, "Failed to save file.")

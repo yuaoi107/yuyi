@@ -5,7 +5,7 @@ from fastapi import UploadFile
 
 
 from ..config.settings import settings
-from .constants import Message, FileType
+from .constants import Message, ContentFileType
 
 
 def add_responses(*status_codes: int) -> dict[int, dict[str, Message]]:
@@ -16,7 +16,7 @@ def add_responses(*status_codes: int) -> dict[int, dict[str, Message]]:
     return responses
 
 
-async def save_file_to_contents(file: UploadFile, filetype: FileType) -> str:
+async def save_file_to_contents(file: UploadFile, content_filetype: ContentFileType) -> str:
     try:
         ext = file.filename.split(".")[-1]
         unique_filename = f"{uuid.uuid4().hex}.{ext}"
