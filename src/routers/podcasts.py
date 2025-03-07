@@ -59,7 +59,7 @@ async def post_user_podcast(
     user_id: int,
     podcast_upload: PodcastUpload
 ):
-    if user_login.role != UserRole.ADMIN and user_login.id != user_id:
+    if user_login.role != UserRole.ADMIN.value and user_login.id != user_id:
         raise HTTPException(403)
     return PodcastService.create_podcast(session, user_id, podcast_upload)
 
@@ -92,7 +92,7 @@ async def post_podcast_with_query(
     author_id: Annotated[int, Query],
     podcast_upload: PodcastUpload
 ):
-    if user_login.role != UserRole.ADMIN and user_login.id != author_id:
+    if user_login.role != UserRole.ADMIN.value and user_login.id != author_id:
         raise HTTPException(403)
     return PodcastService.create_podcast(session, author_id, podcast_upload)
 
@@ -103,7 +103,7 @@ async def post_podcast_with_query(
     response_model=list[PodcastPublic],
     summary="获取播客列表"
 )
-async def get_user_podcasts(
+async def get_podcasts(
     session: SessionDep,
     offset: Annotated[int | None, Query()] = 0,
     limit: Annotated[int | None, Query()] = 10
@@ -131,7 +131,7 @@ async def get_user_by_path(session: SessionDep, podcast_id: int):
 )
 async def put_podcast_by_path(user_login: UserDep, session: SessionDep, podcast_id: int, podcast_update: PodcastUpdate):
     podcast_db = PodcastService.get_podcast(session, podcast_id)
-    if user_login.role != UserRole.ADMIN and user_login.id != podcast_db.author_id:
+    if user_login.role != UserRole.ADMIN.value and user_login.id != podcast_db.author_id:
         raise HTTPException(403)
     return PodcastService.update_podcast(session, podcast_id, podcast_update)
 
@@ -145,7 +145,7 @@ async def put_podcast_by_path(user_login: UserDep, session: SessionDep, podcast_
 )
 async def delete_podcast_by_path(user_login: UserDep, session: SessionDep, podcast_id: int):
     podcast_db = PodcastService.get_podcast(session, podcast_id)
-    if user_login.role != UserRole.ADMIN and user_login.id != podcast_db.author_id:
+    if user_login.role != UserRole.ADMIN.value and user_login.id != podcast_db.author_id:
         raise HTTPException(403)
     return PodcastService.delete_podcast(session, podcast_id)
 
@@ -170,6 +170,6 @@ async def get_podcast_cover(session: SessionDep, podcast_id: int):
 )
 async def put_podcast_cover(user_login: UserDep, session: SessionDep, podcast_id: int, avatar_update: UploadFile):
     podcast_db = PodcastService.get_podcast(session, podcast_id)
-    if user_login.role != UserRole.ADMIN and user_login.id != podcast_db.author_id:
+    if user_login.role != UserRole.ADMIN.value and user_login.id != podcast_db.author_id:
         raise HTTPException(403)
     return await PodcastService.update_podcast_cover(session, podcast_id, avatar_update)

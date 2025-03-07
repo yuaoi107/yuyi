@@ -31,7 +31,8 @@ class Podcast(PodcastBase, table=True):
     itunes_complete: bool = False
     generator: str
     createtime: date
-    published: bool = False
+    is_complete: bool = False
+    is_published: bool = False
 
     author: Optional["User"] = Relationship(back_populates="podcasts")
 
@@ -47,7 +48,8 @@ class PodcastPublic(PodcastBase):
     itunes_complete: bool
     createtime: date
     generator: str
-    published: bool
+    is_complete: bool
+    is_published: bool
 
 
 class PodcastPublicWithAuthor(PodcastPublic):

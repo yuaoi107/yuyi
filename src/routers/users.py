@@ -13,7 +13,7 @@ from ..models.user import (
     UserPublic,
     UserUpdate
 )
-from ..services.user_service import UserService
+from ..services.crud.user_service import UserService
 
 router = APIRouter(
     prefix="/users",
@@ -119,7 +119,7 @@ async def get_user_by_path(session: SessionDep, user_id: int):
     responses=add_responses(401, 403, 404, 409)
 )
 async def put_user_by_path(user_login: UserDep, session: SessionDep, user_id: int, user_update: UserUpdate):
-    if user_login.role != UserRole.ADMIN and user_login.id != user_id:
+    if user_login.role != UserRole.ADMIN.value and user_login.id != user_id:
         raise HTTPException(403)
     return UserService.update_user(session, user_id, user_update)
 
@@ -132,7 +132,7 @@ async def put_user_by_path(user_login: UserDep, session: SessionDep, user_id: in
     responses=add_responses(401, 403, 404)
 )
 async def delete_user_by_path(user_login: UserDep, session: SessionDep, user_id: int):
-    if user_login.role != UserRole.ADMIN and user_login.id != user_id:
+    if user_login.role != UserRole.ADMIN.value and user_login.id != user_id:
         raise HTTPException(403)
     return UserService.delete_user(session, user_id)
 
@@ -156,6 +156,6 @@ async def get_user_avatar_by_path(session: SessionDep, user_id: int):
     responses=add_responses(401, 403, 404)
 )
 async def put_user_avatar_by_path(user_login: UserDep, session: SessionDep, user_id: int, avatar_update: UploadFile):
-    if user_login.role != UserRole.ADMIN and user_login.id != user_id:
+    if user_login.role != UserRole.ADMIN.value and user_login.id != user_id:
         raise HTTPException(403)
     return UserService.update_user_avatar(session, user_id, avatar_update)

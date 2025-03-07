@@ -5,9 +5,10 @@ from fastapi import HTTPException, UploadFile, status
 from fastapi.responses import FileResponse
 from sqlmodel import Session, select
 
-from src.common.util import delete_file_from_contents, save_file_to_contents
-from src.models.podcast import Podcast, PodcastPublic, PodcastUpdate, PodcastUpload
-from src.models.user import User
+from ...common.util import delete_file_from_contents, save_file_to_contents
+from ...models.podcast import Podcast, PodcastPublic, PodcastUpdate, PodcastUpload
+from ...models.user import User
+from ...services.crud.user_service import UserService
 from ...config.settings import settings
 from ...common.constants import Message, ContentFileType
 
@@ -15,9 +16,8 @@ from ...common.constants import Message, ContentFileType
 class PodcastService:
     @staticmethod
     def create_podcast(session: Session, author_id: int, podcast_upload: PodcastUpload) -> PodcastPublic:
-        user_db = session.get(User, author_id)
-        if not user_db:
-            raise HTTPException(status.HTTP_404_NOT_FOUND, "User not found.")
+        user_db = UserService.get_user(session, author_id)
+
         if session.exec(select(Podcast).where(Podcast.title == podcast_upload.title)).first():
             raise HTTPException(status.HTTP_409_CONFLICT, "Title taken.")
 

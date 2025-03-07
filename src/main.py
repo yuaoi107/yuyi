@@ -5,7 +5,7 @@ from fastapi import FastAPI, HTTPException, Query, status
 from .models import *
 from .database.database import create_db_and_tables
 from .config.settings import settings
-from .routers import authentication, users, podcasts
+from .routers import authentication, users, podcasts, episodes
 
 create_db_and_tables()
 
@@ -28,6 +28,7 @@ async def check_app_state(key: Annotated[str, Query()]):
 for router in [
     users.router,
     podcasts.router,
+    episodes.router,
     authentication.router
 ]:
     app.include_router(router)

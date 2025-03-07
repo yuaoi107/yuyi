@@ -25,6 +25,8 @@ State   | Method      | Endpoint
 
 State   | Method      | Endpoint
 --------|-------------|-----
+✅      | **POST**    | `/users/me/podcasts`
+✅      | GET         | `/users/me/podcasts?offset&limit`
 ✅      | **POST**    | `/users/{user_id}/podcasts`
 ✅      | GET         | `/users/{user_id}/podcasts?offset&limit`
 ✅      | **POST**    | `/podcasts?author_id`
@@ -35,24 +37,22 @@ State   | Method      | Endpoint
 ✅      | GET         | `/podcasts/{podcast_id}/cover`
 ✅      | **PUT**     | `/podcasts/{podcast_id}/cover`
 ❌      | GET         | `/podcasts/{podcast_id}/rss`
-✅      | **POST**    | `/users/me/podcasts`
-✅      | GET         | `/users/me/podcasts?offset&limit`
 
 ### 单集
 
 State   | Method      | Endpoint
 --------|-------------|-----
+✅      | **POST**    | `/episodes?podcast_id`
+✅      | GET         | `/episodes?keyword&offset&limit`
+✅      | GET         | `/episodes/{episode_id}`
+✅      | **PUT**     | `/episodes/{episode_id}`
+✅      | **DELETE**  | `/episodes/{episode_id}`
+✅      | GET         | `/episodes/{episode_id}/cover`
+✅      | **PUT**     | `/episodes/{episode_id}/cover`
+✅      | GET         | `/episodes/{episode_id}/audio`
+✅      | **PUT**     | `/episodes/{episode_id}/audio`
 ❌      | **POST**    | `/podcasts/{podcast_id}/episodes`
-❌      | GET         | `/podcasts/{podcast_id}/episodes?season&offset&limit`
-❌      | **POST**    | `/episodes?podcast_id`
-❌      | GET         | `/episodes?offset&limit`
-❌      | GET         | `/episodes/{episode_id}`
-❌      | **PUT**     | `/episodes/{episode_id}`
-❌      | **DELETE**  | `/episodes/{episode_id}`
-❌      | GET         | `/episodes/{episode_id}/cover`
-❌      | **PUT**     | `/episodes/{episode_id}/cover`
-❌      | GET         | `/episodes/{episode_id}/audio`
-❌      | **PUT**     | `/episodes/{episode_id}/audio`
+❌      | GET         | `/podcasts/{podcast_id}/episodes?offset&limit`
 
 ## Working Trace
 
