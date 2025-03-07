@@ -10,7 +10,7 @@ from .podcast_service import PodcastService
 from ...common.util import Message, delete_file_from_contents, save_file_to_contents
 from ...models.episode import (
     Episode,
-    EpisodeUpload,
+    EpisodeCreate,
     EpisodeUpdate
 )
 
@@ -33,7 +33,7 @@ class EpisodeService:
         return session.exec(select(Episode).where(Episode.podcast_id == podcast_id)).all()
 
     @staticmethod
-    def create_episode(session: Session, podcast_id: int, episode_upload: EpisodeUpload) -> Episode:
+    def create_episode(session: Session, podcast_id: int, episode_upload: EpisodeCreate) -> Episode:
         podcast_db = PodcastService.get_podcast(session, podcast_db)
 
         episode_existed = session.exec(select(Episode).where(

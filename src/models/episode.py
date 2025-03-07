@@ -35,7 +35,7 @@ class Episode(EpisodeBase, table=True):
     is_complete: bool = False
 
 
-class EpisodeUpload(EpisodeBase):
+class EpisodeCreate(EpisodeBase):
     pass
 
 

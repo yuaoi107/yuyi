@@ -27,7 +27,7 @@ class User(UserBase, table=True):
     podcasts: list["Podcast"] = Relationship(back_populates="author")
 
 
-class UserUpload(UserBase):
+class UserCreate(UserBase):
     username: str
     password: str
 

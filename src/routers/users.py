@@ -8,7 +8,7 @@ from ..database.database import SessionDep
 from ..common.util import add_responses, Message
 from ..common.auth import UserDep
 from ..models.user import (
-    UserUpload,
+    UserCreate,
     UserPublic,
     UserUpdate
 )
@@ -26,7 +26,7 @@ router = APIRouter(
     response_model=UserPublic, summary="创建用户",
     responses=add_responses(409)
 )
-async def post_user(session: SessionDep, user: UserUpload):
+async def post_user(session: SessionDep, user: UserCreate):
     return UserService.create_user(session, user)
 
 

@@ -5,7 +5,7 @@ from sqlmodel import Session, select
 
 from ...services.crud.episodes_service import EpisodeService
 from ...common.util import delete_file_from_contents, save_file_to_contents
-from ...models.podcast import Podcast, PodcastUpdate, PodcastUpload
+from ...models.podcast import Podcast, PodcastUpdate, PodcastCreate
 from ...services.crud.user_service import UserService
 from ...config.settings import settings
 from ...common.constants import Message, ContentFileType
@@ -13,7 +13,7 @@ from ...common.constants import Message, ContentFileType
 
 class PodcastService:
     @staticmethod
-    def create_podcast(session: Session, author_id: int, podcast_upload: PodcastUpload) -> Podcast:
+    def create_podcast(session: Session, author_id: int, podcast_upload: PodcastCreate) -> Podcast:
         user_db = UserService.get_user(session, author_id)
 
         if session.exec(select(Podcast).where(Podcast.title == podcast_upload.title)).first():

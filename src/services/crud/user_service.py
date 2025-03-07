@@ -10,14 +10,14 @@ from ...common.util import Message, save_file_to_contents, delete_file_from_cont
 from ...common.auth import hash_password
 from ...models.user import (
     User,
-    UserUpload,
+    UserCreate,
     UserUpdate
 )
 
 
 class UserService:
     @staticmethod
-    def create_user(session: Session, user: UserUpload) -> User:
+    def create_user(session: Session, user: UserCreate) -> User:
 
         if session.exec(select(User).where(User.username == user.username)).first():
             raise HTTPException(status.HTTP_409_CONFLICT, "Username taken.")

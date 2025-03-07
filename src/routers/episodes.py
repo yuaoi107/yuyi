@@ -14,7 +14,7 @@ from ..database.database import SessionDep
 from ..common.util import add_responses, Message
 from ..models.episode import (
     Episode,
-    EpisodeUpload,
+    EpisodeCreate,
     EpisodePublic,
     EpisodeUpdate
 )
@@ -35,7 +35,7 @@ async def post_episode_with_query(
     user_login: UserDep,
     session: SessionDep,
     podcast_id: Annotated[int, Query()],
-    episode_upload: EpisodeUpload
+    episode_upload: EpisodeCreate
 ):
     if user_login.role != UserRole.ADMIN.value and PodcastService.get_podcast(session, podcast_id).author_id != user_login.id:
         raise HTTPException(403)
@@ -81,7 +81,7 @@ async def put_episode_by_path(
     user_login: UserDep,
     session: SessionDep,
     episode_id: int,
-    episode_update: EpisodeUpload
+    episode_update: EpisodeCreate
 ):
     episode_to_update = EpisodeService.get_episode(session, episode_id)
     if user_login.role != UserRole.ADMIN.value and \
@@ -183,7 +183,7 @@ async def post_podcast_episode(
     user_login: UserDep,
     session: SessionDep,
     podcast_id: int,
-    episode_upload: EpisodeUpload
+    episode_upload: EpisodeCreate
 ):
     if user_login.role != UserRole.ADMIN.value and PodcastService.get_podcast(session, podcast_id).author_id != user_login.id:
         raise HTTPException(403)

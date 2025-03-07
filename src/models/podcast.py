@@ -39,7 +39,7 @@ class Podcast(PodcastBase, table=True):
     episodes: list["Episode"] = Relationship(back_populates="podcast")
 
 
-class PodcastUpload(PodcastBase):
+class PodcastCreate(PodcastBase):
     pass
 
 

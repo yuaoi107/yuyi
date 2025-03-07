@@ -9,7 +9,7 @@ from ..services.crud.podcast_service import PodcastService
 from ..database.database import SessionDep
 from ..common.util import add_responses, Message
 from ..models.podcast import (
-    PodcastUpload,
+    PodcastCreate,
     PodcastPublic,
     PodcastUpdate
 )
@@ -26,7 +26,7 @@ router = APIRouter(
     summary="为当前用户创建播客",
     responses=add_responses(401)
 )
-async def post_user_me_podcast(user_login: UserDep, session: SessionDep, podcast_upload: PodcastUpload):
+async def post_user_me_podcast(user_login: UserDep, session: SessionDep, podcast_upload: PodcastCreate):
     return PodcastService.create_podcast(session, user_login.id, podcast_upload)
 
 
@@ -57,7 +57,7 @@ async def post_user_podcast(
     user_login: UserDep,
     session: SessionDep,
     user_id: int,
-    podcast_upload: PodcastUpload
+    podcast_upload: PodcastCreate
 ):
     if user_login.role != UserRole.ADMIN.value and user_login.id != user_id:
         raise HTTPException(403)
@@ -90,7 +90,7 @@ async def post_podcast_with_query(
     user_login: UserDep,
     session: SessionDep,
     author_id: Annotated[int, Query],
-    podcast_upload: PodcastUpload
+    podcast_upload: PodcastCreate
 ):
     if user_login.role != UserRole.ADMIN.value and user_login.id != author_id:
         raise HTTPException(403)
