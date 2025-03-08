@@ -59,7 +59,7 @@ class EpisodeService:
         extra_data = {
             "podcast_id": podcast_id,
             "guid": uuid4().hex,
-            "pub_date": formatdate(time())
+            "pub_date": formatdate(time(), True)
         }
 
         new_episode = Episode.model_validate(episode_upload, update=extra_data)

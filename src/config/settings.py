@@ -21,6 +21,9 @@ class Settings(BaseSettings):
     # Database
     PGDB_URL: str = ""
 
+    # Base Url
+    BASE_URL: str = "http://localhost:8000/"
+
     # Static files dir
     CONTENTS_DIR: str = ""
 

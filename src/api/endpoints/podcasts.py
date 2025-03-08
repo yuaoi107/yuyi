@@ -1,13 +1,14 @@
 from typing import Annotated
 
 from fastapi import APIRouter, Query, UploadFile, status
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, PlainTextResponse, Response
 
 from src.core.auth import UserDep
 from src.core.database import SessionDep
 from src.core.constants import CommonMessage
 from src.models.podcast import PodcastCreate, PodcastPublic, PodcastUpdate
 from src.services.podcast_service import PodcastService
+from src.services.rss_service import RSSService
 
 router = APIRouter(tags=["播客"])
 
@@ -76,3 +77,9 @@ async def get_podcast_cover(session: SessionDep, id: int):
 async def put_podcast_cover(user_login: UserDep, session: SessionDep, id: int, avatar_update: UploadFile):
     podcast_service = PodcastService(session, user_login)
     return await podcast_service.update_cover_by_id(id, avatar_update)
+
+
+@router.get("/podcasts/{id}/rss", status_code=status.HTTP_200_OK, summary="获取指定播客RSS")
+async def get_podcast_cover(session: SessionDep):
+
+    return Response(RSSService(session).generate_rss(), media_type="application/xml")
