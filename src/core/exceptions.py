@@ -3,59 +3,97 @@ class AppException(Exception):
 
     def __init__(self, message: str, code: int = 400):
         super().__init__(message)
+        # content
         self.message = message
+        # status code
         self.code = code
 
 
-class UserAlreadyExistsException(AppException):
+class AuthenticationFailedException(AppException):
 
-    def __init__(self, message: str = "用户已存在"):
+    def __init__(self, message: str = ""):
+        super().__init__(message, 401)
+
+
+class AlreadyExistsException(AppException):
+
+    def __init__(self, message: str):
         super().__init__(message, 409)
 
 
-class NameAlreadyExistsException(AppException):
+class UserAlreadyExistsException(AlreadyExistsException):
 
-    def __init__(self, message: str = "名称已存在"):
-        super().__init__(message, 409)
+    def __init__(self, message: str = "User Already Exists."):
+        super().__init__(message)
 
 
-class UserNotFoundException(AppException):
+class UserNameAlreadyExistsException(AlreadyExistsException):
 
-    def __init__(self, message: str = "用户不存在"):
+    def __init__(self, message: str = "User Name Already Exists."):
+        super().__init__(message)
+
+
+class PodcastTitleAlreadyExistsException(AlreadyExistsException):
+
+    def __init__(self, message: str = "Podcast Title Already Exists."):
+        super().__init__(message)
+
+
+class EpisodeTitleAlreadyExistsException(AlreadyExistsException):
+
+    def __init__(self, message: str = "Episode Title Already Exists."):
+        super().__init__(message)
+
+
+class NotFoundException(AppException):
+
+    def __init__(self, message: str):
         super().__init__(message, 404)
 
 
-class AvatarNotFoundException(AppException):
+class UserNotFoundException(AlreadyExistsException):
 
-    def __init__(self, message: str = "头像不存在"):
-        super().__init__(message, 404)
+    def __init__(self, message: str = "User Not Found."):
+        super().__init__(message)
+
+
+class UserAvatarNotFoundException(NotFoundException):
+
+    def __init__(self, message: str = "User Avatar Not Found."):
+        super().__init__(message)
+
+
+class PodcastNotFoundException(NotFoundException):
+
+    def __init__(self, message: str = "Podcast Not Found."):
+        super().__init__(message)
+
+
+class PodcastCoverNotFoundException(NotFoundException):
+
+    def __init__(self, message: str = "Cover Not Found."):
+        super().__init__(message)
+
+
+class EpisodeCoverNotFoundException(NotFoundException):
+
+    def __init__(self, message: str = "Cover Not Found."):
+        super().__init__(message)
+
+
+class EpisodeAudioNotFoundException(NotFoundException):
+
+    def __init__(self, message: str = "Episode Audio Not Found."):
+        super().__init__(message)
+
+
+class EpisodeNotFoundException(NotFoundException):
+
+    def __init__(self, message: str = "Episode Not Found."):
+        super().__init__(message)
 
 
 class NoPermissionException(AppException):
 
-    def __init__(self, message: str = "当前用户没有权限"):
+    def __init__(self, message: str = "Current User Have No Permission."):
         super().__init__(message, 403)
-
-
-class PodcastNotFoundException(AppException):
-
-    def __init__(self, message: str = "播客不存在"):
-        super().__init__(message, 404)
-
-
-class CoverNotFoundException(AppException):
-
-    def __init__(self, message: str = "封面不存在"):
-        super().__init__(message, 404)
-
-
-class AudioNotFoundException(AppException):
-
-    def __init__(self, message: str = "音频不存在"):
-        super().__init__(message, 404)
-
-
-class EpisodeNotFoundException(AppException):
-
-    def __init__(self, message: str = "单集不存在"):
-        super().__init__(message, 404)

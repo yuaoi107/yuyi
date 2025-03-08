@@ -6,21 +6,16 @@ from sqlmodel import Session, select
 
 from src.models.episode import Episode
 from src.models.podcast import Podcast
-from src.core.constants import ContentFileType, UserRole
-from src.core.constants import Message
-from src.services.util import save_file_to_contents, delete_file_from_contents
+from src.models.user import User, UserCreate, UserUpdate
 from src.core.auth import hash_password
+from src.core.constants import ContentFileType, UserRole, CommonMessage
+from src.services.utils import save_file_to_contents, delete_file_from_contents
 from src.core.exceptions import (
     UserAlreadyExistsException,
-    NameAlreadyExistsException,
+    UserNameAlreadyExistsException,
     UserNotFoundException,
-    AvatarNotFoundException,
+    UserAvatarNotFoundException,
     NoPermissionException
-)
-from src.models.user import (
-    User,
-    UserCreate,
-    UserUpdate
 )
 
 
@@ -42,7 +37,7 @@ class UserService:
             select(User).where(User.nickname == user.nickname)
         ).first()
         if same_name_user:
-            raise NameAlreadyExistsException()
+            raise UserNameAlreadyExistsException()
 
         hashed_password = hash_password(user.password)
         extra_data = {
@@ -83,7 +78,7 @@ class UserService:
             select(User).where(User.nickname == user_update.nickname)
         ).first()
         if same_name_user:
-            raise NameAlreadyExistsException()
+            raise UserNameAlreadyExistsException()
 
         user_data = user_update.model_dump(exclude_unset=True)
         extra_data = {}
@@ -99,7 +94,7 @@ class UserService:
 
         return user
 
-    def delete_user_by_id(self, user_id: int) -> Message:
+    def delete_user_by_id(self, user_id: int) -> CommonMessage:
 
         if self.user_login.id != user_id and self.user_login.role != UserRole.ADMIN.value:
             raise NoPermissionException()
@@ -113,17 +108,17 @@ class UserService:
         self.session.delete(user)
         self.session.commit()
 
-        return Message(detail="Successfully deleted")
+        return CommonMessage(message="Successfully Deleted")
 
     def get_avatar_by_id(self, user_id: int) -> FileResponse:
 
         user = self.get_user_by_id(user_id)
         if not user.avatar_path:
-            raise AvatarNotFoundException()
+            raise UserAvatarNotFoundException()
 
         return FileResponse(user.avatar_path)
 
-    async def update_avatar_by_id(self, user_id: int, avatar_update: UploadFile) -> Message:
+    async def update_avatar_by_id(self, user_id: int, avatar_update: UploadFile) -> CommonMessage:
 
         if self.user_login.id != user_id and self.user_login.role != UserRole.ADMIN.value:
             raise NoPermissionException()
@@ -136,7 +131,7 @@ class UserService:
         self.session.add(user)
         self.session.commit()
 
-        return Message(detail="Avatar changed.")
+        return CommonMessage(message="Avatar Changed.")
 
     def _delete_existing_avatar(self, user: User) -> None:
 

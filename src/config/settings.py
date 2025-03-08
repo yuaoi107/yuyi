@@ -3,11 +3,20 @@ from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
 
-    # Project info
-    PROJECT_TITLE: str = ""
-    PROJECT_SUMMARY: str = ""
-    BASE_URL: str = ""
-    GENERATOR_TITLE: str = ""
+    # Project Configs, no need to cover
+
+    # Basic Info
+    PROJECT_TITLE: str = "Yuyi APIs"
+    PROJECT_SUMMARY: str = "雨呓（Yuyi）是一个泛用型播客托管平台的 RESTful API 后端。"
+    PROJECT_DESCRIPTION: str = """
+作者： [Coin Chiang](mailto://myabandonment@foxmail.com)
+    
+仓库： [Yuyi on Gitee](https://gitee.com/coinchiang/yuyi)
+"""
+
+    GENERATOR_TITLE: str = "Yuyi 0.1.0"
+
+    # Environment Specific Configs, need to cover
 
     # Database
     PGDB_URL: str = ""

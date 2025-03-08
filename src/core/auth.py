@@ -8,9 +8,9 @@ from pydantic import BaseModel
 from sqlmodel import Session, select
 from passlib.context import CryptContext
 
-from ..database.database import SessionDep
-from ..models.user import User
-from ..config.settings import settings
+from src.core.database import SessionDep
+from src.models.user import User
+from src.config.settings import settings
 
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")

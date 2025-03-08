@@ -16,5 +16,5 @@ class ContentFileType(Enum):
     RSS_XML = "rss_xmls"
 
 
-class Message(BaseModel):
-    detail: str
+class CommonMessage(BaseModel):
+    message: str

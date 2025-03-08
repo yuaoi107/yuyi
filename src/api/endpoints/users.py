@@ -3,20 +3,13 @@ from typing import Annotated
 from fastapi import APIRouter, Query, UploadFile, status
 from fastapi.responses import FileResponse
 
-from src.database.database import SessionDep
-from src.core.constants import Message
+from src.core.database import SessionDep
 from src.core.auth import UserDep
-from src.models.user import (
-    UserCreate,
-    UserPublic,
-    UserUpdate
-)
+from src.core.constants import CommonMessage
+from src.models.user import UserCreate, UserPublic, UserUpdate
 from src.services.user_service import UserService
 
-router = APIRouter(
-    prefix="/users",
-    tags=["用户"]
-)
+router = APIRouter(prefix="/users", tags=["用户"])
 
 
 @router.post("", status_code=status.HTTP_201_CREATED, response_model=UserPublic, summary="创建用户")
@@ -42,13 +35,13 @@ async def put_user_me(user_login: UserDep, session: SessionDep, user_update: Use
     return user_service.update_user_by_id(user_login.id, user_update)
 
 
-@router.delete("/me", status_code=status.HTTP_200_OK, response_model=Message, summary="删除当前用户")
+@router.delete("/me", status_code=status.HTTP_200_OK, response_model=CommonMessage, summary="删除当前用户")
 async def delete_user_me(user_login: UserDep, session: SessionDep):
     user_service = UserService(session, user_login)
     return user_service.delete_user_by_id(user_login.id)
 
 
-@router.put("/me/avatar", status_code=status.HTTP_200_OK, response_model=Message, summary="修改当前用户头像")
+@router.put("/me/avatar", status_code=status.HTTP_200_OK, response_model=CommonMessage, summary="修改当前用户头像")
 async def put_user_me_avatar(user_login: UserDep, session: SessionDep, avatar_update: UploadFile):
     user_service = UserService(session, user_login)
     return await user_service.update_avatar_by_id(user_login.id, avatar_update)
@@ -72,7 +65,7 @@ async def put_user_by_path(user_login: UserDep, session: SessionDep, id: int, us
     return user_service.update_user_by_id(id, user_update)
 
 
-@router.delete("/{id}", status_code=status.HTTP_200_OK, response_model=Message, summary="删除指定用户")
+@router.delete("/{id}", status_code=status.HTTP_200_OK, response_model=CommonMessage, summary="删除指定用户")
 async def delete_user_by_path(user_login: UserDep, session: SessionDep, id: int):
     user_service = UserService(session, user_login)
     return user_service.delete_user_by_id(id)
@@ -84,7 +77,7 @@ async def get_user_avatar_by_path(session: SessionDep, id: int):
     return user_service.get_avatar_by_id(id)
 
 
-@router.put("/{id}/avatar", status_code=status.HTTP_200_OK, response_model=Message, summary="修改指定用户头像")
+@router.put("/{id}/avatar", status_code=status.HTTP_200_OK, response_model=CommonMessage, summary="修改指定用户头像")
 async def put_user_avatar_by_path(user_login: UserDep, session: SessionDep, id: int, avatar_update: UploadFile):
     user_service = UserService(session, user_login)
     return await user_service.update_avatar_by_id(id, avatar_update)

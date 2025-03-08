@@ -1,7 +1,7 @@
 from typing import Annotated
 from fastapi import Depends
 from sqlmodel import SQLModel, create_engine, Session
-from ..config.settings import settings
+from src.config.settings import settings
 
 engine = create_engine(settings.PGDB_URL)
 
