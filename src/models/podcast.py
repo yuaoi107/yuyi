@@ -15,25 +15,26 @@ class PodcastBase(SQLModel):
     language: str
     itunes_category: str
     itunes_subcategory: str | None = None
-    itunes_explicit: bool = False
 
-    copyright: str = "Copyleft."
+    copyright: str | None
 
 
 class Podcast(PodcastBase, table=True):
 
     id: int | None = Field(default=None, primary_key=True)
-    author_id: int | None = Field(default=None, foreign_key="user.id")
+    author_id: int = Field(foreign_key="user.id")
     itunes_image_path: str | None = None
     feed_path: str | None = None
+
+    itunes_explicit: bool = False
+
     link: str | None = None
-    itunes_author: str
-    itunes_block: bool = False
-    itunes_complete: bool = False
-    generator: str
-    createtime: date
-    is_complete: bool = False
-    is_published: bool = False
+    itunes_author: str | None = None
+    itunes_block: bool | None = False
+    generator: str | None = None
+    createtime: str | None = None
+
+    has_update: bool = False
 
     author: Optional["User"] = Relationship(back_populates="podcasts")
     episodes: list["Episode"] = Relationship(back_populates="podcast")
@@ -46,7 +47,7 @@ class PodcastCreate(PodcastBase):
 class PodcastPublic(PodcastBase):
     id: int
     author_id: int
-    createtime: date
+    createtime: str
     itunes_complete: bool
     createtime: date
     generator: str
@@ -65,8 +66,5 @@ class PodcastUpdate(SQLModel):
     language: str | None = None
     itunes_category: str | None = None
     itunes_subcategory: str | None = None
-    itunes_explicit: bool = False
 
     copyright: str | None = None
-    itunes_complete: bool | None = None
-    published: bool | None = None
