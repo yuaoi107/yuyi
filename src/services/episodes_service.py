@@ -10,6 +10,7 @@ from src.core.constants import ContentFileType, UserRole, CommonMessage
 from src.models.episode import Episode, EpisodeCreate, EpisodeUpdate
 from src.models.podcast import Podcast
 from src.models.user import User
+from src.services.rss_service import RSSService
 from src.services.utils import save_file_to_contents, delete_file_from_contents
 from src.core.exceptions import (
     EpisodeAudioNotFoundException,
@@ -26,6 +27,7 @@ class EpisodeService:
     def __init__(self, session: Session, user_login: User | None = None):
         self.session = session
         self.user_login = user_login
+        self.rss_service = RSSService()
 
     def get_episode_by_id(self, id: int) -> Episode:
         episode = self.session.get(Episode, id)
@@ -65,6 +67,11 @@ class EpisodeService:
         new_episode = Episode.model_validate(episode_upload, update=extra_data)
         self.session.add(new_episode)
         self.session.commit()
+
+        self.rss_service.update_podcast_rss(podcast)
+        self.session.add(podcast)
+        self.session.commit()
+
         self.session.refresh(new_episode)
 
         return new_episode
@@ -87,6 +94,11 @@ class EpisodeService:
         self.session.add(episode)
         self.session.commit()
         self.session.refresh(episode)
+
+        self.rss_service.update_podcast_rss(podcast)
+        self.session.add(podcast)
+        self.session.commit()
+
         return episode
 
     def delete_episode_by_id(self, id: int) -> CommonMessage:
@@ -100,6 +112,10 @@ class EpisodeService:
             delete_file_from_contents(episode.enclosure_path)
 
         self.session.delete(episode)
+        self.session.commit()
+
+        self.rss_service.update_podcast_rss(podcast)
+        self.session.add(podcast)
         self.session.commit()
 
         return CommonMessage(message="Episode Deleted.")
@@ -131,7 +147,7 @@ class EpisodeService:
 
         if not episode.enclosure_path:
             raise EpisodeAudioNotFoundException()
-        return FileResponse(episode.itunes_image_path)
+        return FileResponse(episode.enclosure_path)
 
     async def update_audio_by_id(self, id: int, audio_update: UploadFile) -> CommonMessage:
         episode = self.get_episode_by_id(id)
@@ -140,9 +156,16 @@ class EpisodeService:
             raise NoPermissionException()
 
         self._delete_existing_audio(episode)
+        episode.enclosure_length = audio_update.size
+        episode.enclosure_type = audio_update.content_type
         episode.enclosure_path = await save_file_to_contents(audio_update, ContentFileType.AUDIO)
 
         self.session.add(episode)
+        self.session.commit()
+
+        self.session.refresh(episode)
+        self.rss_service.update_podcast_rss(podcast)
+        self.session.add(podcast)
         self.session.commit()
 
         return CommonMessage(message="Audio Changed.")

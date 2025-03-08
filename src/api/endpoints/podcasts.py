@@ -80,6 +80,6 @@ async def put_podcast_cover(user_login: UserDep, session: SessionDep, id: int, a
 
 
 @router.get("/podcasts/{id}/rss", status_code=status.HTTP_200_OK, summary="获取指定播客RSS")
-async def get_podcast_cover(session: SessionDep):
-
-    return Response(RSSService(session).generate_rss(), media_type="application/xml")
+async def get_podcast_cover(session: SessionDep, id: int):
+    podcast_service = PodcastService(session)
+    return podcast_service.get_rss_by_id(id)

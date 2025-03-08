@@ -7,11 +7,13 @@ from src.config.settings import settings
 from src.models.episode import Episode
 from src.models.user import User
 from src.models.podcast import Podcast, PodcastUpdate, PodcastCreate
+from src.services.rss_service import RSSService
 from src.services.utils import save_file_to_contents, delete_file_from_contents
 from src.core.constants import CommonMessage, ContentFileType, UserRole
 from src.core.exceptions import (
     PodcastCoverNotFoundException,
     NoPermissionException,
+    PodcastFeedNotFoundException,
     PodcastNotFoundException,
     UserNotFoundException,
     PodcastTitleAlreadyExistsException
@@ -23,6 +25,7 @@ class PodcastService:
     def __init__(self, session: Session, user_login: User | None = None):
         self.session = session
         self.user_login = user_login
+        self.rss_service = RSSService()
 
     def create_podcast_by_author_id(self, author_id: int, podcast_upload: PodcastCreate) -> Podcast:
         if self.user_login.id != author_id and self.user_login.role != UserRole.ADMIN.value:
@@ -40,11 +43,15 @@ class PodcastService:
             "author_id": author.id,
             "itunes_author": author.nickname,
             "createtime": date.today().isoformat(),
-            "generator": settings.GENERATOR_TITLE
+            "generator": settings.GENERATOR_NAME
         }
 
         new_podcast = Podcast.model_validate(podcast_upload, update=extra_data)
         self.session.add(new_podcast)
+        self.session.commit()
+        self.session.refresh(new_podcast)
+
+        self.rss_service.update_podcast_rss(new_podcast)
         self.session.commit()
         self.session.refresh(new_podcast)
 
@@ -77,6 +84,11 @@ class PodcastService:
         podcast.sqlmodel_update(podcast_update.model_dump(exclude_unset=True))
         self.session.add(podcast)
         self.session.commit()
+        self.session.refresh(podcast)
+
+        self.rss_service.update_podcast_rss(podcast)
+        self.session.commit()
+        self.session.refresh(podcast)
 
         return podcast
 
@@ -86,6 +98,7 @@ class PodcastService:
             raise NoPermissionException()
 
         self._delete_existing_cover(podcast)
+        self.rss_service._delete_existing_rss_xml()
 
         for episode in podcast.episodes:
             self._delete_episode(episode)
@@ -115,6 +128,15 @@ class PodcastService:
         self.session.commit()
 
         return CommonMessage(message="Cover Changed.")
+
+    def get_rss_by_id(self, id: int) -> FileResponse:
+
+        podcast = self.get_podcast_by_id(id)
+
+        if not podcast.feed_path:
+            raise PodcastFeedNotFoundException()
+
+        return FileResponse(podcast.feed_path)
 
     def _get_user_by_id(self, user_id):
         user = self.session.get(User, user_id)

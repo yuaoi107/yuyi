@@ -1,18 +1,17 @@
 from typing import TYPE_CHECKING, Optional
 
 from sqlmodel import Relationship, SQLModel, Field
-from datetime import date
 
 if TYPE_CHECKING:
-    from .user import User, UserPublic
-    from .episode import Episode
+    from src.models.user import User, UserPublic
+    from src.models.episode import Episode
 
 
 class PodcastBase(SQLModel):
 
     title: str
     description: str
-    language: str
+    language: str = "zh"
     itunes_category: str
     itunes_subcategory: str | None = None
 
@@ -34,8 +33,6 @@ class Podcast(PodcastBase, table=True):
     generator: str | None = None
     createtime: str | None = None
 
-    has_update: bool = False
-
     author: Optional["User"] = Relationship(back_populates="podcasts")
     episodes: list["Episode"] = Relationship(back_populates="podcast")
 
@@ -48,11 +45,7 @@ class PodcastPublic(PodcastBase):
     id: int
     author_id: int
     createtime: str
-    itunes_complete: bool
-    createtime: date
-    generator: str
-    is_complete: bool
-    is_published: bool
+    createtime: str
 
 
 class PodcastPublicWithAuthor(PodcastPublic):

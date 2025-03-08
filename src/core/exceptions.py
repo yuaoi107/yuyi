@@ -75,6 +75,12 @@ class PodcastCoverNotFoundException(NotFoundException):
         super().__init__(message)
 
 
+class PodcastFeedNotFoundException(NotFoundException):
+
+    def __init__(self, message: str = "Podcast Feed Not Found."):
+        super().__init__(message)
+
+
 class EpisodeCoverNotFoundException(NotFoundException):
 
     def __init__(self, message: str = "Cover Not Found."):

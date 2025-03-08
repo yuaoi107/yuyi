@@ -1,4 +1,6 @@
 
+import os
+import uuid
 from xml.dom.minidom import Document, Element
 
 from sqlmodel import Session
@@ -7,17 +9,26 @@ from src.core.constants import ContentFileType
 from src.models.episode import Episode
 from src.models.podcast import Podcast
 from src.config.settings import settings
+from src.services.utils import delete_file_from_contents
 
 
 class RSSService:
 
-    def __init__(self, session: Session, podcast: Podcast = None):
-        self.podcast = session.get(Podcast, 1)
+    def __init__(self):
+        # self.podcast = podcast
+        pass
 
-    def generate_rss(self) -> str:
+    def update_podcast_rss(self, podcast: Podcast):
+
+        self.podcast = podcast
+
+        self._delete_existing_rss_xml()
+        self._generate_rss()
+
+    def _generate_rss(self) -> None:
 
         if not self._check_podcast_integrity():
-            return "bad podcast"
+            return
 
         itunes_namespace_url = "http://www.itunes.com/dtds/podcast-1.0.dtd"
         content_namespace_url = "http://purl.org/rss/1.0/modules/content/"
@@ -36,7 +47,23 @@ class RSSService:
 
         self._populate_channel_element(xml_doc, channel_element)
 
-        return xml_doc.toprettyxml()
+        feed_path = self._write_xml_to_file(xml_doc)
+
+        self.podcast.feed_path = feed_path
+
+    def _write_xml_to_file(self, xml_doc: Document) -> str:
+
+        unique_filename = uuid.uuid4().hex + ".xml"
+        target_dir = os.path.join(
+            settings.CONTENTS_DIR, ContentFileType.RSS_XML.value)
+        if not os.path.exists(target_dir):
+            os.makedirs(target_dir)
+        filename = os.path.join(target_dir, unique_filename)
+
+        with open(filename, 'w', encoding="UTF-8") as file:
+            xml_doc.writexml(file, encoding="UTF-8")
+
+        return filename
 
     def _populate_channel_element(self, xml_doc: Document, channel_element: Element):
 
@@ -101,6 +128,10 @@ class RSSService:
     def _add_items(self, xml_doc: Document, channel_element: Element):
 
         for episode in self.podcast.episodes:
+
+            if not self._check_episode_integrity(episode):
+                continue
+
             item = xml_doc.createElement("item")
             channel_element.appendChild(item)
 
@@ -172,6 +203,13 @@ class RSSService:
 
         return True
 
+    def _check_episode_integrity(self, episode: Episode) -> bool:
+
+        return episode.title and \
+            episode.enclosure_path and \
+            episode.enclosure_length and \
+            episode.enclosure_type
+
     def _get_content_url(self, id: int, filetype: ContentFileType) -> str:
 
         if filetype == ContentFileType.PODCAST_COVER:
@@ -182,3 +220,8 @@ class RSSService:
 
         if filetype == ContentFileType.AUDIO:
             return settings.BASE_URL + "/".join(["episodes", str(id), "audio"])
+
+    def _delete_existing_rss_xml(self):
+
+        if self.podcast.feed_path:
+            delete_file_from_contents(self.podcast.feed_path)

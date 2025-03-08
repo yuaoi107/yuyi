@@ -14,7 +14,7 @@ class Settings(BaseSettings):
 仓库： [Yuyi on Gitee](https://gitee.com/coinchiang/yuyi)
 """
 
-    GENERATOR_TITLE: str = "Yuyi 0.1.0"
+    GENERATOR_NAME: str = "Yuyi 0.1.0"
 
     # Environment Specific Configs, need to cover
 

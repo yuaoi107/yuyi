@@ -1,9 +1,8 @@
 from typing import Optional, TYPE_CHECKING
 from sqlmodel import Relationship, SQLModel, Field
-from datetime import datetime
 
 if TYPE_CHECKING:
-    from .podcast import Podcast
+    from src.models.podcast import Podcast
 
 
 class EpisodeBase(SQLModel):

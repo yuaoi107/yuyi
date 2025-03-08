@@ -103,7 +103,7 @@ class UserService:
         self._delete_existing_avatar(user)
 
         for podcast in user.podcasts:
-            self._delete_podcast(user)
+            self._delete_podcast(podcast)
 
         self.session.delete(user)
         self.session.commit()
