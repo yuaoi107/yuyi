@@ -1,31 +1,43 @@
 
 import os
+import io
+from typing import Annotated
 import uuid
 from xml.dom.minidom import Document, Element
 
-from sqlmodel import Session
+from fastapi import Depends
 
+from src.services.cos_service import CosService, CosServiceDep
 from src.core.constants import ContentFileType
 from src.models.episode import Episode
 from src.models.podcast import Podcast
 from src.config.settings import settings
-from src.services.utils import delete_file_from_contents
 
 
-class RSSService:
+class RssService:
 
-    def __init__(self):
-        # self.podcast = podcast
-        pass
+    def __init__(self, cos_service: CosService):
+
+        self.cos_service = cos_service
+        self.podcast = None
 
     def update_podcast_rss(self, podcast: Podcast):
 
         self.podcast = podcast
 
         self._delete_existing_rss_xml()
-        self._generate_rss()
+        xml_doc = self._generate_rss()
 
-    def _generate_rss(self) -> None:
+        if not xml_doc:
+            return
+
+        xml_str = xml_doc.toxml().encode('utf-8')
+        xml_binary_io = io.BytesIO(xml_str)
+        xml_filename = f"users/{self.podcast.author_id}/podcasts/{self.podcast.id}/rss"
+        self.cos_service.save_file(xml_binary_io, xml_filename)
+        self.podcast.feed_path = xml_filename
+
+    def _generate_rss(self) -> Document:
 
         if not self._check_podcast_integrity():
             return
@@ -47,9 +59,7 @@ class RSSService:
 
         self._populate_channel_element(xml_doc, channel_element)
 
-        feed_path = self._write_xml_to_file(xml_doc)
-
-        self.podcast.feed_path = feed_path
+        return xml_doc
 
     def _write_xml_to_file(self, xml_doc: Document) -> str:
 
@@ -224,4 +234,11 @@ class RSSService:
     def _delete_existing_rss_xml(self):
 
         if self.podcast.feed_path:
-            delete_file_from_contents(self.podcast.feed_path)
+            self.cos_service.delete_file(self.podcast.feed_path)
+
+
+def get_rss_service(cos_service: CosServiceDep):
+    return RssService(cos_service)
+
+
+RssServiceDep = Annotated[RssService, Depends(get_rss_service)]

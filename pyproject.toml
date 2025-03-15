@@ -8,9 +8,10 @@ dependencies = [
     "alembic>=1.15.1",
     "annotated-types==0.7.0",
     "anyio==4.8.0",
-    "bcrypt==4.3.0",
+    "bcrypt==4.0.1",
     "certifi==2025.1.31",
     "click==8.1.8",
+    "cos-python-sdk-v5>=1.9.34",
     "dnspython==2.7.0",
     "email-validator==2.2.0",
     "fastapi==0.115.11",
@@ -25,6 +26,7 @@ dependencies = [
     "markdown-it-py==3.0.0",
     "markupsafe==3.0.2",
     "mdurl==0.1.2",
+    "mutagen>=1.47.0",
     "passlib==1.7.4",
     "psycopg2-binary==2.9.10",
     "pydantic==2.10.6",
@@ -49,3 +51,7 @@ dependencies = [
     "watchfiles==1.0.4",
     "websockets==15.0",
 ]
+
+[[tool.uv.index]]
+url = "https://pypi.tuna.tsinghua.edu.cn/simple"
+default = true

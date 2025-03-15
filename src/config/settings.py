@@ -21,9 +21,16 @@ class Settings(BaseSettings):
     # Database
     PGDB_URL: str = ""
 
+    # COS
+
+    COS_SECRET_ID: str = ""
+    COS_SECRET_KEY: str = ""
+    COS_REGION: str = ""
+    COS_BUCKET: str = ""
+
     # Base Url
-    # BASE_URL: str = "http://10.42.0.1:8000/"
-    BASE_URL: str = "http://127.0.0.1:8000/"
+    BASE_URL: str = "http://10.42.0.1:8000/"
+    # BASE_URL: str = "http://127.0.0.1:8000/"
 
     # Static files dir
     CONTENTS_DIR: str = ""

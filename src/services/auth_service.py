@@ -5,7 +5,7 @@ from sqlmodel import Session
 
 from src.config.settings import settings
 from src.core.auth import Token, authenticate_user, create_access_token
-from src.core.exceptions import AuthenticationFailedException
+from src.core.exceptions import AuthenticationFailedError
 
 
 class AuthenticationService:
@@ -18,7 +18,7 @@ class AuthenticationService:
         user = authenticate_user(
             self.session, self.form_data.username, self.form_data.password)
         if not user:
-            raise AuthenticationFailedException()
+            raise AuthenticationFailedError()
         access_token_expires = timedelta(
             minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
         access_token = create_access_token(

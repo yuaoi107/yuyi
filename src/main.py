@@ -2,12 +2,13 @@ from typing import Annotated
 
 from fastapi import FastAPI, HTTPException, Request, status, Query
 from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
 
 from src.config.settings import settings
 from src.core.constants import CommonMessage
 from src.models import *
 from src.core.database import create_db_and_tables
-from src.core.exceptions import AppException, AuthenticationFailedException
+from src.core.exceptions import AppError, AuthenticationFailedError
 from src.api.endpoints import auth, users, podcasts, episodes
 
 create_db_and_tables()
@@ -18,10 +19,18 @@ app = FastAPI(
     description=settings.PROJECT_DESCRIPTION
 )
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"]
+)
 
-@app.exception_handler(AppException)
-async def app_exception_handler(request: Request, exc: AppException):
-    if isinstance(exc, AuthenticationFailedException):
+
+@app.exception_handler(AppError)
+async def app_exception_handler(request: Request, exc: AppError):
+    if isinstance(exc, AuthenticationFailedError):
         raise HTTPException(
             status_code=401,
             detail="Incorrect username or password",
@@ -32,6 +41,7 @@ async def app_exception_handler(request: Request, exc: AppException):
 
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
+    print(exc)
     return JSONResponse(status_code=500, content={"message": "服务器内部错误"})
 
 
